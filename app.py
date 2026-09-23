@@ -968,8 +968,8 @@ with input_col:
                 image_bytes
             ).hexdigest()
 
-            image = Image.open(
-                BytesIO(image_bytes)
+            image = ImageOps.exif_transpose(
+                Image.open(BytesIO(image_bytes))
             ).convert("RGB")
 
             st.image(
