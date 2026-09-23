@@ -14,7 +14,7 @@ from google import genai
 # ============================================================
 
 st.set_page_config(
-    page_title="ИИ-анализатор состава",
+    page_title="Анализатор состава продуктов E-vision",
     page_icon="🧪",
     layout="wide"
 )
@@ -172,6 +172,7 @@ def confidence_label(value):
 
 
 # ============================================================
+# ============================================================
 # HISTORY
 # ============================================================
 
@@ -182,9 +183,7 @@ def load_history():
     try:
         with open(HISTORY_FILE, "r", encoding="utf-8") as file:
             history = json.load(file)
-
         return history if isinstance(history, list) else []
-
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
@@ -197,14 +196,9 @@ def save_history(history):
 def add_to_history(product_text, result):
     history = load_history()
 
-    # Не создаём дубликат, если последний сохранённый анализ
-    # имеет точно такой же состав.
-    if history and history[0].get("text", "").strip() == product_text.strip():
-        return
-
     item = {
         "id": hashlib.md5(
-            f"{product_text}{datetime.now().timestamp()}".encode("utf-8")
+            f"{product_text}|{datetime.now().isoformat()}".encode("utf-8")
         ).hexdigest(),
         "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
         "text": product_text,
@@ -212,19 +206,15 @@ def add_to_history(product_text, result):
     }
 
     history.insert(0, item)
-
-    # Храним максимум 50 последних анализов.
     save_history(history[:50])
 
 
 def delete_from_history(item_id):
     history = load_history()
-
     history = [
         item for item in history
         if item.get("id") != item_id
     ]
-
     save_history(history)
 
 
@@ -664,10 +654,7 @@ with st.sidebar:
     else:
         st.caption(f"Сохранено анализов: {len(history)}")
 
-        if st.button(
-            "🗑️ Очистить всю историю",
-            use_container_width=True
-        ):
+        if st.button("🗑️ Очистить всю историю", use_container_width=True):
             save_history([])
             st.session_state.pop("selected_history", None)
             st.rerun()
@@ -676,40 +663,22 @@ with st.sidebar:
 
         for item in history:
             saved_result = item.get("result", {})
+            score = safe_score(saved_result.get("score"))
+            verdict = str(saved_result.get("verdict", "orange")).lower()
+            icon = verdict_icon(verdict)
 
-            saved_score = safe_score(
-                saved_result.get("score")
+            product_type = saved_result.get(
+                "product_type", "Неизвестный продукт"
             )
+            category = saved_result.get("category", "Другое")
 
-            saved_verdict = str(
-                saved_result.get("verdict", "orange")
-            ).lower()
-
-            saved_icon = verdict_icon(saved_verdict)
-
-            saved_type = saved_result.get(
-                "product_type",
-                "Неизвестный продукт"
-            )
-
-            saved_category = saved_result.get(
-                "category",
-                "Другое"
-            )
-
-            st.markdown(
-                f"**{saved_icon} {saved_type}**"
-            )
-
-            st.caption(
-                f"{saved_category} · {saved_score}/100"
-            )
-
+            st.markdown(f"**{icon} {product_type}**")
+            st.caption(f"{category} · {score}/100")
             st.caption(item.get("date", ""))
 
-            open_col, delete_col = st.columns([3, 1])
+            col_open, col_delete = st.columns([3, 1])
 
-            with open_col:
+            with col_open:
                 if st.button(
                     "Открыть",
                     key=f"open_{item['id']}",
@@ -718,7 +687,7 @@ with st.sidebar:
                     st.session_state.selected_history = item
                     st.rerun()
 
-            with delete_col:
+            with col_delete:
                 if st.button(
                     "🗑️",
                     key=f"delete_{item['id']}",
@@ -728,16 +697,16 @@ with st.sidebar:
 
                     if (
                         st.session_state.get(
-                            "selected_history",
-                            {}
+                            "selected_history", {}
                         ).get("id") == item["id"]
                     ):
                         st.session_state.pop(
-                            "selected_history",
-                            None
+                            "selected_history", None
                         )
 
                     st.rerun()
+
+            st.divider()
 
 
 # ============================================================
@@ -752,35 +721,20 @@ if selected_history:
     st.divider()
     st.subheader("📚 Сохранённый анализ")
 
-    saved_score = safe_score(
-        saved_result.get("score")
-    )
+    score = safe_score(saved_result.get("score"))
+    verdict = str(saved_result.get("verdict", "orange")).lower()
 
-    saved_verdict = str(
-        saved_result.get("verdict", "orange")
-    ).lower()
+    if verdict not in {"green", "orange", "red"}:
+        verdict = "orange"
 
-    if saved_verdict not in {"green", "orange", "red"}:
-        saved_verdict = "orange"
+    icon = verdict_icon(verdict)
 
-    saved_icon = verdict_icon(saved_verdict)
+    category = saved_result.get("category", "Не определено")
+    product_type = saved_result.get("product_type", "Не определено")
 
-    saved_category = saved_result.get(
-        "category",
-        "Не определено"
-    )
-
-    saved_type = saved_result.get(
-        "product_type",
-        "Не определено"
-    )
-
-    st.markdown(
-        f"### {saved_icon} {saved_type}"
-    )
-
+    st.markdown(f"### {icon} {product_type}")
     st.caption(
-        f"{saved_category} · {saved_score}/100 · "
+        f"{category} · {score}/100 · "
         f"{selected_history.get('date', '')}"
     )
 
@@ -792,33 +746,24 @@ if selected_history:
     )
 
     st.markdown("**Состав:**")
+    st.code(selected_history.get("text", ""), language=None)
 
-    st.code(
-        selected_history.get("text", ""),
-        language=None
-    )
-
-    saved_ingredients = as_list(
+    ingredients = as_list(
         saved_result.get("ingredients", [])
     )
 
-    if saved_ingredients:
+    if ingredients:
         st.markdown("**Компоненты:**")
 
-        for ingredient in saved_ingredients:
+        for ingredient in ingredients:
             if not isinstance(ingredient, dict):
                 continue
 
-            name = ingredient.get(
-                "name",
-                "Ингредиент"
-            )
-
+            name = ingredient.get("name", "Ингредиент")
             ingredient_type = ingredient.get(
                 "type",
                 "Назначение не указано"
             )
-
             status = str(
                 ingredient.get("status", "orange")
             ).lower()
@@ -830,19 +775,13 @@ if selected_history:
             }.get(status, "🟠")
 
             st.markdown(
-                f"{ingredient_icon} **{name}** — "
-                f"{ingredient_type}"
+                f"{ingredient_icon} **{name}** — {ingredient_type}"
             )
 
-    benefits = as_list(
-        saved_result.get("benefits", [])
-    )
-
-    risks = as_list(
-        saved_result.get("risks", [])
-    )
-
     st.markdown("### Итог")
+
+    benefits = as_list(saved_result.get("benefits", []))
+    risks = as_list(saved_result.get("risks", []))
 
     if benefits:
         st.markdown("**✅ Положительные стороны**")
@@ -853,6 +792,96 @@ if selected_history:
         st.markdown("**⚠️ Что требует внимания**")
         for item in risks:
             st.markdown(f"• {item}")
+
+    # ========================================================
+    # SAVED ALLERGY ALERTS
+    # ========================================================
+
+    allergy_alerts = as_list(
+        saved_result.get(
+            "allergy_alerts",
+            []
+        )
+    )
+
+    allergy_note = str(
+        saved_result.get(
+            "allergy_note",
+            ""
+        )
+    ).strip()
+
+    if allergy_alerts or allergy_note:
+
+        st.subheader(
+            "⚠️ Аллергены и чувствительность"
+        )
+
+        if allergy_alerts:
+
+            for alert in allergy_alerts:
+
+                if not isinstance(
+                    alert,
+                    dict
+                ):
+                    continue
+
+                alert_name = str(
+                    alert.get(
+                        "name",
+                        "Компонент"
+                    )
+                )
+
+                alert_reason = str(
+                    alert.get(
+                        "reason",
+                        "Может требовать внимания "
+                        "при индивидуальной чувствительности."
+                    )
+                )
+
+                alert_level = str(
+                    alert.get(
+                        "level",
+                        "attention"
+                    )
+                ).lower()
+
+                if alert_level == "high":
+                    alert_icon = "🔴"
+                    alert_title = "Требует особого внимания"
+                elif alert_level == "low":
+                    alert_icon = "🟡"
+                    alert_title = "Невысокий уровень внимания"
+                else:
+                    alert_icon = "🟠"
+                    alert_title = "Требует внимания"
+
+                with st.container(border=True):
+                    st.markdown(
+                        f"### {alert_icon} {alert_name}"
+                    )
+                    st.caption(
+                        alert_title
+                    )
+                    st.write(
+                        alert_reason
+                    )
+
+        else:
+
+            st.success(
+                "✅ По предоставленному составу "
+                "явных компонентов, требующих отдельного "
+                "внимания с точки зрения аллергии, не обнаружено."
+            )
+
+        if allergy_note:
+            st.caption(
+                f"ℹ️ {allergy_note}"
+            )
 
     st.info(
         saved_result.get(
@@ -1114,9 +1143,12 @@ if analyze:
 
     if result:
 
-        if st.session_state.get("last_analysis_text") != product_text:
-            add_to_history(product_text, result)
-            st.session_state.last_analysis_text = product_text
+        # Сохраняем результат каждого нажатия кнопки
+        # «Анализировать состав».
+        add_to_history(
+            product_text,
+            result
+        )
 
         st.divider()
 
@@ -1382,12 +1414,126 @@ if analyze:
                             ingredient_type
                         )
 
+                        explanation = str(
+                            ingredient.get(
+                                "explanation",
+                                ""
+                            )
+                        ).strip()
+
+                        if explanation:
+                            st.write(
+                                explanation
+                            )
+
+                        attention_reason = str(
+                            ingredient.get(
+                                "attention_reason",
+                                ""
+                            )
+                        ).strip()
+
+                        if attention_reason:
+                            st.warning(
+                                f"⚠️ {attention_reason}"
+                            )
+
         else:
 
             st.info(
                 "Подробный разбор компонентов "
                 "не получен."
             )
+
+        # ====================================================
+        # ALLERGY ALERTS
+        # ====================================================
+
+        allergy_alerts = as_list(
+            result.get(
+                "allergy_alerts",
+                []
+            )
+        )
+
+        allergy_note = str(
+            result.get(
+                "allergy_note",
+                ""
+            )
+        ).strip()
+
+        if allergy_alerts or allergy_note:
+
+            st.subheader(
+                "⚠️ Аллергены и чувствительность"
+            )
+
+            if allergy_alerts:
+
+                for alert in allergy_alerts:
+
+                    if not isinstance(
+                        alert,
+                        dict
+                    ):
+                        continue
+
+                    alert_name = str(
+                        alert.get(
+                            "name",
+                            "Компонент"
+                        )
+                    )
+
+                    alert_reason = str(
+                        alert.get(
+                            "reason",
+                            "Может требовать внимания "
+                            "при индивидуальной чувствительности."
+                        )
+                    )
+
+                    alert_level = str(
+                        alert.get(
+                            "level",
+                            "attention"
+                        )
+                    ).lower()
+
+                    if alert_level == "high":
+                        alert_icon = "🔴"
+                        alert_title = "Требует особого внимания"
+                    elif alert_level == "low":
+                        alert_icon = "🟡"
+                        alert_title = "Невысокий уровень внимания"
+                    else:
+                        alert_icon = "🟠"
+                        alert_title = "Требует внимания"
+
+                    with st.container(border=True):
+                        st.markdown(
+                            f"### {alert_icon} {alert_name}"
+                        )
+                        st.caption(
+                            alert_title
+                        )
+                        st.write(
+                            alert_reason
+                        )
+
+            else:
+
+                st.success(
+                    "✅ По предоставленному составу "
+                    "явных компонентов, требующих отдельного "
+                    "внимания с точки зрения аллергии, не обнаружено."
+                )
+
+            if allergy_note:
+                st.caption(
+                    f"ℹ️ {allergy_note}"
+                )
 
         # ====================================================
         # FINAL INFORMATION
