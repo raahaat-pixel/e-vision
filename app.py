@@ -122,7 +122,7 @@ def gemini_request(prompt):
     )
 
     response = client.models.generate_content(
-        model="gemini-3.6-flash",
+        model="gemini-3.5-flash-lite",
         contents=prompt
     )
 
@@ -627,7 +627,7 @@ red:
 # ============================================================
 
 st.markdown(
-    '<div class="main-title">🧪 ИИ-анализатор состава</div>',
+    '<div class="main-title">🧪 Анализатор состава продуктов E-vision</div>',
     unsafe_allow_html=True
 )
 
