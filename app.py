@@ -1350,7 +1350,24 @@ E-vision распознает компоненты, объяснит их наз
 # SIDEBAR — HISTORY
 # ============================================================
 with st.sidebar:
-    st.header(":material/history: История анализов")
+    history_col, refresh_col = st.columns([5, 1])
+
+    with history_col:
+        st.header(":material/history: История анализов")
+
+    with refresh_col:
+        if st.button(
+            ":material/refresh:",
+            help="Обновить страницу",
+        ):
+            st.markdown(
+                """
+                <script>
+                    window.parent.location.reload();
+                </script>
+                """,
+                unsafe_allow_html=True,
+            )
     history = load_history()
     if not history:
         st.caption("Здесь появятся ваши анализы.")
