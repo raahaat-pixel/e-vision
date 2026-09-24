@@ -50,22 +50,42 @@ st.markdown(
         background-size: 44px 44px, 190px 190px;
         mask-image: linear-gradient(to bottom, black 0%, transparent 82%);
     }
-
+    
+        /* === ШАПКА И КНОПКА МЕНЮ === */
     [data-testid="stHeader"] {
         background: rgba(244,248,255,.58) !important;
         backdrop-filter: blur(18px) !important;
+        z-index: 99999 !important;
     }
 
+    /* ПРИНУДИТЕЛЬНО ВОЗВРАЩАЕМ КНОПКУ ИСТОРИИ (САЙДБАРА) СЛЕВА */
+    [data-testid="collapsedControl"],
+    [data-testid="collapsedControl"] * {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 100000 !important;
+    }
+
+    /* Меню с тремя точками справа (остальное скрываем) */
     [data-testid="stToolbar"] {
         display: flex !important;
     }
-    
-    [data-testid="stToolbar"] > div:not(:last-child) {
+    [data-testid="stToolbar"] a, 
+    [data-testid="stToolbar"] button:not([aria-label="Main menu"]) {
         display: none !important;
     }
 
-
+    /* === ПЛАШКИ И ОТСТУПЫ === */
+    #viewerBadge_container, 
     .viewerBadge_container, 
+    .viewerBadge_link, 
+    [data-testid="stViewerBadge"] {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
     footer, 
     .stDeployButton {
         display: none !important;
@@ -73,11 +93,12 @@ st.markdown(
 
     .block-container {
         max-width: 1420px;
-        padding-top: 4.2rem; /* Немного уменьшил отступ на десктопе, так как нет шапки */
-        padding-bottom: 4rem;
+        padding-top: 4.2rem;
+        padding-bottom: 8rem !important; /* УВЕЛИЧИЛИ отступ снизу из-за красной плашки */
         position: relative;
         z-index: 1;
     }
+
     .main-title {
         font-size: clamp(31px, 4vw, 48px);
         font-weight: 850;
@@ -690,46 +711,6 @@ st.markdown(
 </style>
     """,
     unsafe_allow_html=True,
-)
-
-# ============================================================
-# JAVASCRIPT HACK TO REMOVE STREAMLIT CLOUD BADGES
-# ============================================================
-import streamlit.components.v1 as components
-
-components.html(
-    """
-    <script>
-    // Ждем загрузки элементов и удаляем плашки Streamlit Cloud
-    const hideElements = () => {
-        const elements = [
-            ...window.parent.document.querySelectorAll('.viewerBadge_container'),
-            ...window.parent.document.querySelectorAll('.viewerBadge_link'),
-            ...window.parent.document.querySelectorAll('#viewerBadge_container'),
-            ...window.parent.document.querySelectorAll('[data-testid="stViewerBadge"]')
-        ];
-        
-        elements.forEach(el => {
-            if (el) el.style.display = 'none';
-        });
-
-        // Скрываем кнопки Fork и Github в меню
-        const menuItems = window.parent.document.querySelectorAll('[data-testid="stToolbar"] a, [data-testid="stToolbar"] button');
-        menuItems.forEach(el => {
-            if (el && !el.getAttribute('aria-label')?.includes('Main menu')) {
-                el.style.display = 'none';
-            }
-        });
-    };
-
-    // Запускаем скрытие сразу и повторяем через небольшие интервалы, 
-    // так как Streamlit может перерисовывать DOM
-    hideElements();
-    setInterval(hideElements, 1000);
-    </script>
-    """,
-    height=0,
-    width=0,
 )
 
 
