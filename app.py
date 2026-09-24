@@ -50,13 +50,20 @@ st.markdown(
         background-size: 44px 44px, 190px 190px;
         mask-image: linear-gradient(to bottom, black 0%, transparent 82%);
     }
+
+    /* СКРЫВАЕМ СТАНДАРТНЫЕ ЭЛЕМЕНТЫ STREAMLIT CLOUD */
     [data-testid="stHeader"] {
-        background: rgba(244,248,255,.58);
-        backdrop-filter: blur(18px);
+        display: none !important;
     }
+    .viewerBadge_container, 
+    footer, 
+    .stDeployButton {
+        display: none !important;
+    }
+
     .block-container {
         max-width: 1420px;
-        padding-top: 5.2rem;
+        padding-top: 4.2rem; /* Немного уменьшил отступ на десктопе, так как нет шапки */
         padding-bottom: 4rem;
         position: relative;
         z-index: 1;
@@ -181,7 +188,7 @@ st.markdown(
         line-height: 1.55;
         color: #718096;
     }
-    /* LIQUID GLASS — the two main panels use the hero recipe. */
+    /* LIQUID GLASS */
     .st-key-ev-input-panel,
     .st-key-ev-process-panel {
         position: relative !important;
@@ -648,7 +655,7 @@ st.markdown(
         box-shadow: 0 10px 30px rgba(22,119,255,.08);
     }
     @media (max-width: 760px) {
-        .block-container { padding-top: 1rem; padding-left: .8rem; padding-right: .8rem; }
+        .block-container { padding-top: 2rem; padding-left: .8rem; padding-right: .8rem; }
         .ev-hero,
         .st-key-ev-input-panel,
         .st-key-ev-process-panel { padding: 22px !important; border-radius: 23px !important; }
@@ -674,6 +681,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
 # ============================================================
 # GEMINI
 # ============================================================
