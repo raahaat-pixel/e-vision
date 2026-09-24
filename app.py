@@ -1302,9 +1302,21 @@ def get_base64_image(image_path):
         return ""
 logo_base64 = get_base64_image("logo.png")
 if logo_base64:
-    logo_html = f'<img src="data:image/png;base64,{logo_base64}" style="height: 64px; width: 64px; margin-right: 12px; vertical-align: middle; border-radius: 14px; box-shadow: 0 8px 24px rgba(30,64,175,.12);">'
+    logo_html = f'''
+    <a href="" title="Обновить страницу" style="display: inline-block;">
+        <img src="data:image/png;base64,{logo_base64}"
+             style="height: 64px; width: 64px; margin-right: 12px;
+                    vertical-align: middle; border-radius: 14px;
+                    box-shadow: 0 8px 24px rgba(30,64,175,.12);
+                    cursor: pointer;">
+    </a>
+    '''
 else:
-    logo_html = '<span class="brand-mark">E</span>'
+    logo_html = '''
+    <a href="" title="Обновить страницу" style="display: inline-block;">
+        <span class="brand-mark" style="cursor: pointer;">E</span>
+    </a>
+    '''
 st.markdown(
     f"""
     <div class="main-title" style="display: flex; align-items: center; margin-bottom: 15px;">
@@ -1350,24 +1362,7 @@ E-vision распознает компоненты, объяснит их наз
 # SIDEBAR — HISTORY
 # ============================================================
 with st.sidebar:
-    history_col, refresh_col = st.columns([5, 1])
-
-    with history_col:
-        st.header(":material/history: История анализов")
-
-    with refresh_col:
-        if st.button(
-            ":material/refresh:",
-            help="Обновить страницу",
-        ):
-            st.markdown(
-                """
-                <script>
-                    window.parent.location.reload();
-                </script>
-                """,
-                unsafe_allow_html=True,
-            )
+    st.header(":material/history: История анализов")
     history = load_history()
     if not history:
         st.caption("Здесь появятся ваши анализы.")
