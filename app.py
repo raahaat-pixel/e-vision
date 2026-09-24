@@ -26,24 +26,137 @@ st.set_page_config(
 
 st.markdown(
     """
-    <style>
+<style>
+    :root {
+        --ev-blue: #2563eb;
+        --ev-cyan: #06b6d4;
+        --ev-green: #22c55e;
+        --ev-ink: #0f172a;
+        --ev-muted: #64748b;
+    }
+
+    .stApp {
+        background:
+            radial-gradient(circle at 8% 8%, rgba(37,99,235,.10), transparent 26%),
+            radial-gradient(circle at 92% 18%, rgba(6,182,212,.09), transparent 24%),
+            radial-gradient(circle at 50% 92%, rgba(34,197,94,.07), transparent 28%),
+            #f7faff;
+        color: var(--ev-ink);
+    }
+
+    .stApp::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        opacity: .36;
+        background-image:
+            radial-gradient(circle, rgba(37,99,235,.20) 1px, transparent 1.5px),
+            linear-gradient(120deg, transparent 49.7%, rgba(37,99,235,.045) 50%, transparent 50.3%);
+        background-size: 42px 42px, 180px 180px;
+        mask-image: linear-gradient(to bottom, black, transparent 80%);
+    }
+
+    [data-testid="stHeader"] {
+        background: rgba(247,250,255,.72);
+    }
+
     .block-container {
         max-width: 1400px;
-        padding-top: 1.8rem;
-        padding-bottom: 3rem;
+        padding-top: 2rem;
+        padding-bottom: 4rem;
+        position: relative;
+        z-index: 1;
     }
 
     .main-title {
-        font-size: 38px;
-        font-weight: 800;
-        letter-spacing: -1px;
-        margin-bottom: 4px;
+        font-size: clamp(30px, 4vw, 46px);
+        font-weight: 850;
+        letter-spacing: -1.6px;
+        line-height: 1.05;
+        margin-bottom: 7px;
+        background: linear-gradient(90deg, #0f172a 0%, #2563eb 48%, #0891b2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
     .subtitle {
         font-size: 16px;
-        opacity: .65;
-        margin-bottom: 28px;
+        color: #64748b;
+        margin-bottom: 24px;
+    }
+
+    .ev-hero {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(37,99,235,.15);
+        border-radius: 28px;
+        padding: 30px;
+        margin: 4px 0 24px;
+        background:
+            radial-gradient(circle at 85% 15%, rgba(6,182,212,.18), transparent 22%),
+            radial-gradient(circle at 10% 90%, rgba(37,99,235,.12), transparent 28%),
+            rgba(255,255,255,.78);
+        box-shadow: 0 18px 50px rgba(15,23,42,.08);
+        backdrop-filter: blur(14px);
+    }
+
+    .ev-hero::after {
+        content: "◌  •  ◌  •  ◌";
+        position: absolute;
+        right: 24px;
+        top: 20px;
+        font-size: 32px;
+        letter-spacing: 8px;
+        color: rgba(37,99,235,.10);
+        transform: rotate(-10deg);
+    }
+
+    .ev-kicker {
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .ev-hero-title {
+        font-size: clamp(24px, 3vw, 36px);
+        font-weight: 850;
+        letter-spacing: -1px;
+        margin-bottom: 8px;
+    }
+
+    .ev-hero-text {
+        max-width: 720px;
+        color: #64748b;
+        line-height: 1.6;
+        font-size: 15px;
+    }
+
+    .workflow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    .workflow-step {
+        padding: 9px 13px;
+        border-radius: 999px;
+        background: rgba(239,246,255,.95);
+        border: 1px solid rgba(37,99,235,.10);
+        color: #1e40af;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .workflow-arrow {
+        color: #94a3b8;
+        font-weight: 800;
     }
 
     .score-number {
@@ -73,6 +186,7 @@ st.markdown(
             #a3e635 75%,
             #22c55e 100%
         );
+        box-shadow: inset 0 1px 3px rgba(15,23,42,.12);
     }
 
     .scale-marker {
@@ -100,6 +214,77 @@ st.markdown(
         font-size: 11px;
         line-height: 1.55;
         opacity: .58;
+    }
+
+    .ev-analysis {
+        border: 1px solid rgba(37,99,235,.14);
+        border-radius: 22px;
+        padding: 20px;
+        margin: 18px 0;
+        background: rgba(239,246,255,.62);
+        box-shadow: 0 10px 30px rgba(15,23,42,.05);
+    }
+
+    .ev-analysis-label {
+        color: #2563eb;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.7px;
+        text-transform: uppercase;
+    }
+
+    .ev-analysis-title {
+        font-size: 20px;
+        font-weight: 800;
+        margin-top: 5px;
+    }
+
+    .ev-progress {
+        height: 7px;
+        margin-top: 15px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(148,163,184,.20);
+    }
+
+    .ev-progress > div {
+        width: 68%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #2563eb, #06b6d4);
+        animation: evscan 1.7s ease-in-out infinite;
+        transform-origin: left;
+    }
+
+    @keyframes evscan {
+        0%, 100% { transform: scaleX(.28); opacity: .65; }
+        50% { transform: scaleX(1); opacity: 1; }
+    }
+
+    @media (max-width: 760px) {
+        .block-container {
+            padding-top: 1.1rem;
+            padding-left: .85rem;
+            padding-right: .85rem;
+        }
+
+        .ev-hero {
+            padding: 22px;
+            border-radius: 22px;
+        }
+
+        .workflow {
+            gap: 6px;
+        }
+
+        .workflow-arrow {
+            display: none;
+        }
+
+        .workflow-step {
+            font-size: 11px;
+            padding: 8px 10px;
+        }
     }
     </style>
     """,
@@ -972,6 +1157,34 @@ st.markdown(
 )
 
 
+st.markdown(
+    """
+    <div class="ev-hero">
+        <div class="ev-kicker">E-VISION · AI PRODUCT ANALYSIS</div>
+        <div class="ev-hero-title">Понимайте состав продукта с первого взгляда.</div>
+        <div class="ev-hero-text">
+            Загрузите фотографию этикетки или вставьте состав вручную.
+            E-vision распознает компоненты, объяснит их назначение и
+            сформирует понятный индекс состава.
+        </div>
+
+        <div class="workflow">
+            <span class="workflow-step">📷 Фото</span>
+            <span class="workflow-arrow">→</span>
+            <span class="workflow-step">👁 Vision AI</span>
+            <span class="workflow-arrow">→</span>
+            <span class="workflow-step">🧬 Ингредиенты</span>
+            <span class="workflow-arrow">→</span>
+            <span class="workflow-step">🧠 Анализ</span>
+            <span class="workflow-arrow">→</span>
+            <span class="workflow-step">📊 Результат</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
 # ============================================================
 # SIDEBAR — HISTORY
 # ============================================================
@@ -1121,7 +1334,7 @@ input_col, info_col = st.columns(
 # ============================================================
 
 with input_col:
-    st.subheader("📝 Данные продукта")
+    st.subheader("📦 Данные продукта")
 
     method = st.radio(
         "Способ ввода",
@@ -1227,7 +1440,7 @@ with input_col:
 # ============================================================
 
 with info_col:
-    st.subheader("⚙️ Как работает анализ")
+    st.subheader("🔄 Как работает E-vision")
 
     if method == "📷 Загрузить фото":
         steps = [
@@ -1311,6 +1524,17 @@ if analyze:
             )
             st.stop()
 
+        st.markdown(
+            """
+            <div class="ev-analysis">
+                <div class="ev-analysis-label">VISION AI · ANALYZING</div>
+                <div class="ev-analysis-title">Сканируем этикетку и разбираем состав...</div>
+                <div class="ev-progress"><div></div></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
         with st.spinner(
             "🤖 Gemini читает фотографию и анализирует состав..."
         ):
@@ -1349,6 +1573,17 @@ if analyze:
                 "⚠️ Введите состав продукта."
             )
             st.stop()
+
+        st.markdown(
+            """
+            <div class="ev-analysis">
+                <div class="ev-analysis-label">E-VISION · ANALYZING</div>
+                <div class="ev-analysis-title">Разбираем ингредиенты и формируем оценку...</div>
+                <div class="ev-progress"><div></div></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
         with st.spinner(
             "🤖 Анализируем состав..."
