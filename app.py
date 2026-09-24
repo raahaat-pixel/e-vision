@@ -59,25 +59,17 @@ st.markdown(
     [data-testid="stToolbar"] {
         display: flex !important;
     }
-    [data-testid="stToolbar"] a, 
-    [data-testid="stToolbar"] button:not([aria-label="Main menu"]) {
+    
+    [data-testid="stToolbar"] > div:not(:last-child) {
         display: none !important;
     }
 
-    #viewerBadge_container, 
+
     .viewerBadge_container, 
-    .viewerBadge_link, 
-    [data-testid="stViewerBadge"] {
-        display: none !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }
-
     footer, 
     .stDeployButton {
         display: none !important;
     }
-
 
     .block-container {
         max-width: 1420px;
@@ -699,6 +691,47 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+# ============================================================
+# JAVASCRIPT HACK TO REMOVE STREAMLIT CLOUD BADGES
+# ============================================================
+import streamlit.components.v1 as components
+
+components.html(
+    """
+    <script>
+    // Ждем загрузки элементов и удаляем плашки Streamlit Cloud
+    const hideElements = () => {
+        const elements = [
+            ...window.parent.document.querySelectorAll('.viewerBadge_container'),
+            ...window.parent.document.querySelectorAll('.viewerBadge_link'),
+            ...window.parent.document.querySelectorAll('#viewerBadge_container'),
+            ...window.parent.document.querySelectorAll('[data-testid="stViewerBadge"]')
+        ];
+        
+        elements.forEach(el => {
+            if (el) el.style.display = 'none';
+        });
+
+        // Скрываем кнопки Fork и Github в меню
+        const menuItems = window.parent.document.querySelectorAll('[data-testid="stToolbar"] a, [data-testid="stToolbar"] button');
+        menuItems.forEach(el => {
+            if (el && !el.getAttribute('aria-label')?.includes('Main menu')) {
+                el.style.display = 'none';
+            }
+        });
+    };
+
+    // Запускаем скрытие сразу и повторяем через небольшие интервалы, 
+    // так как Streamlit может перерисовывать DOM
+    hideElements();
+    setInterval(hideElements, 1000);
+    </script>
+    """,
+    height=0,
+    width=0,
+)
+
 
 # ============================================================
 # GEMINI
