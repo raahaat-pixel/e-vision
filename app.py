@@ -51,10 +51,20 @@ st.markdown(
         mask-image: linear-gradient(to bottom, black 0%, transparent 82%);
     }
 
-    /* СКРЫВАЕМ СТАНДАРТНЫЕ ЭЛЕМЕНТЫ STREAMLIT CLOUD */
     [data-testid="stHeader"] {
+        background: rgba(244,248,255,.58) !important;
+        backdrop-filter: blur(18px) !important;
+    }
+
+    [data-testid="stToolbar"] {
+        display: flex !important;
+    }
+    
+    [data-testid="stToolbar"] > div:not(:last-child) {
         display: none !important;
     }
+
+
     .viewerBadge_container, 
     footer, 
     .stDeployButton {
