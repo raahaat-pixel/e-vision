@@ -50,55 +50,17 @@ st.markdown(
         background-size: 44px 44px, 190px 190px;
         mask-image: linear-gradient(to bottom, black 0%, transparent 82%);
     }
-    
-        /* === ШАПКА И КНОПКА МЕНЮ === */
     [data-testid="stHeader"] {
-        background: rgba(244,248,255,.58) !important;
-        backdrop-filter: blur(18px) !important;
-        z-index: 99999 !important;
+        background: rgba(244,248,255,.58);
+        backdrop-filter: blur(18px);
     }
-
-    /* ПРИНУДИТЕЛЬНО ВОЗВРАЩАЕМ КНОПКУ ИСТОРИИ (САЙДБАРА) СЛЕВА */
-    [data-testid="collapsedControl"],
-    [data-testid="collapsedControl"] * {
-        display: flex !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        z-index: 100000 !important;
-    }
-
-    /* Меню с тремя точками справа (остальное скрываем) */
-    [data-testid="stToolbar"] {
-        display: flex !important;
-    }
-    [data-testid="stToolbar"] a, 
-    [data-testid="stToolbar"] button:not([aria-label="Main menu"]) {
-        display: none !important;
-    }
-
-    /* === ПЛАШКИ И ОТСТУПЫ === */
-    #viewerBadge_container, 
-    .viewerBadge_container, 
-    .viewerBadge_link, 
-    [data-testid="stViewerBadge"] {
-        display: none !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }
-
-    footer, 
-    .stDeployButton {
-        display: none !important;
-    }
-
     .block-container {
         max-width: 1420px;
-        padding-top: 4.2rem;
-        padding-bottom: 8rem !important; /* УВЕЛИЧИЛИ отступ снизу из-за красной плашки */
+        padding-top: 5.2rem;
+        padding-bottom: 4rem;
         position: relative;
         z-index: 1;
     }
-
     .main-title {
         font-size: clamp(31px, 4vw, 48px);
         font-weight: 850;
@@ -219,7 +181,7 @@ st.markdown(
         line-height: 1.55;
         color: #718096;
     }
-    /* LIQUID GLASS */
+    /* LIQUID GLASS — the two main panels use the hero recipe. */
     .st-key-ev-input-panel,
     .st-key-ev-process-panel {
         position: relative !important;
@@ -686,7 +648,8 @@ st.markdown(
         box-shadow: 0 10px 30px rgba(22,119,255,.08);
     }
     @media (max-width: 760px) {
-        .block-container { padding-top: 2rem; padding-left: .8rem; padding-right: .8rem; }
+        .block-container { padding-top: 1rem; padding-left: .8rem; padding-right: .8rem; }
+        .main-title { margin-top: 4rem !important; }
         .ev-hero,
         .st-key-ev-input-panel,
         .st-key-ev-process-panel { padding: 22px !important; border-radius: 23px !important; }
@@ -712,8 +675,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-
 # ============================================================
 # GEMINI
 # ============================================================
