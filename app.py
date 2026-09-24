@@ -59,17 +59,25 @@ st.markdown(
     [data-testid="stToolbar"] {
         display: flex !important;
     }
-    
-    [data-testid="stToolbar"] > div:not(:last-child) {
+    [data-testid="stToolbar"] a, 
+    [data-testid="stToolbar"] button:not([aria-label="Main menu"]) {
         display: none !important;
     }
 
-
+    #viewerBadge_container, 
     .viewerBadge_container, 
+    .viewerBadge_link, 
+    [data-testid="stViewerBadge"] {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
     footer, 
     .stDeployButton {
         display: none !important;
     }
+
 
     .block-container {
         max-width: 1420px;
