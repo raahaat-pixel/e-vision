@@ -1302,21 +1302,9 @@ def get_base64_image(image_path):
         return ""
 logo_base64 = get_base64_image("logo.png")
 if logo_base64:
-    logo_html = f'''
-    <a href="" title="Обновить страницу" style="display: inline-block;">
-        <img src="data:image/png;base64,{logo_base64}"
-             style="height: 64px; width: 64px; margin-right: 12px;
-                    vertical-align: middle; border-radius: 14px;
-                    box-shadow: 0 8px 24px rgba(30,64,175,.12);
-                    cursor: pointer;">
-    </a>
-    '''
+    logo_html = f'<img src="data:image/png;base64,{logo_base64}" style="height: 64px; width: 64px; margin-right: 12px; vertical-align: middle; border-radius: 14px; box-shadow: 0 8px 24px rgba(30,64,175,.12);">'
 else:
-    logo_html = '''
-    <a href="" title="Обновить страницу" style="display: inline-block;">
-        <span class="brand-mark" style="cursor: pointer;">E</span>
-    </a>
-    '''
+    logo_html = '<span class="brand-mark">E</span>'
 st.markdown(
     f"""
     <div class="main-title" style="display: flex; align-items: center; margin-bottom: 15px;">
