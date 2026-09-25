@@ -22,655 +22,1322 @@ st.set_page_config(
 st.markdown(
     """
 <style>
-    :root {
-        --ev-ink: #0b1220;
-        --ev-muted: #64748b;
-        --ev-blue: #1677ff;
-        --ev-cyan: #18c8ff;
+
+:root {
+    --ev-ink: #0b1220;
+    --ev-muted: #64748b;
+    --ev-blue: #1677ff;
+    --ev-cyan: #18c8ff;
+}
+
+.stApp {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 8% 10%, rgba(22,119,255,.16), transparent 27%),
+        radial-gradient(circle at 90% 16%, rgba(24,200,255,.14), transparent 25%),
+        radial-gradient(circle at 55% 90%, rgba(99,102,241,.10), transparent 30%),
+        linear-gradient(135deg, #f4f8ff 0%, #eef5ff 48%, #f8fbff 100%);
+    color: var(--ev-ink);
+}
+
+.stApp::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: .27;
+    background-image:
+        radial-gradient(circle, rgba(22,119,255,.20) 1px, transparent 1.4px),
+        linear-gradient(120deg, transparent 49.7%, rgba(24,200,255,.035) 50%, transparent 50.3%);
+    background-size: 44px 44px, 190px 190px;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 82%);
+}
+
+[data-testid="stHeader"] {
+    background: rgba(244,248,255,.58);
+    backdrop-filter: blur(18px);
+}
+
+.block-container {
+    max-width: 1420px;
+    padding-top: 5.2rem;
+    padding-bottom: 4rem;
+    position: relative;
+    z-index: 1;
+}
+
+.main-title {
+    font-size: clamp(31px, 4vw, 48px);
+    font-weight: 850;
+    letter-spacing: -1.8px;
+    line-height: 1.04;
+    margin-bottom: 7px;
+    background: linear-gradient(100deg, #07111f 5%, #1677ff 52%, #00a9dc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: var(--ev-muted);
+    margin-bottom: 22px;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+[data-testid="stSidebar"] {
+    background: transparent !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+    height: 100% !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin;
+}
+
+[data-testid="stSidebar"] [data-testid="stSidebarContent"]::-webkit-scrollbar {
+    width: 7px;
+}
+
+[data-testid="stSidebar"] [data-testid="stSidebarContent"]::-webkit-scrollbar-thumb {
+    background: rgba(100,116,139,.28);
+    border-radius: 999px;
+}
+
+[data-testid="stSidebar"] > div:first-child {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(245,249,255,.84),
+            rgba(232,240,252,.70)
+        ) !important;
+    border-right: 1px solid rgba(255,255,255,.94);
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow:
+        10px 0 34px rgba(30,64,175,.07),
+        inset -1px 0 0 rgba(120,160,220,.08);
+    backdrop-filter: blur(24px) saturate(145%);
+    -webkit-backdrop-filter: blur(24px) saturate(145%);
+    overflow: hidden;
+}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+
+.section-kicker {
+    color: #1677ff;
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    margin-bottom: 9px;
+}
+
+.glass-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 21px;
+}
+
+.glass-section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 50%;
+    background: rgba(37,99,235,.10);
+    border: 1px solid rgba(37,99,235,.15);
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 850;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.glass-section-name {
+    font-size: clamp(25px, 3vw, 34px);
+    font-weight: 850;
+    letter-spacing: -1.2px;
+    line-height: 1.12;
+    color: #07111f;
+}
+
+.process-step {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    column-gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(148,163,184,.13);
+}
+
+.process-step:last-child {
+    border-bottom: 0;
+    padding-bottom: 2px;
+}
+
+.process-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.62);
+    border: 1px solid rgba(255,255,255,.88);
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 850;
+    box-shadow:
+        0 5px 16px rgba(30,64,175,.07),
+        inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.process-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #172033;
+    margin-bottom: 4px;
+}
+
+.process-description {
+    font-size: 12px;
+    line-height: 1.55;
+    color: #718096;
+}
+
+/* ============================================================
+   MAIN LIQUID GLASS PANELS
+   ============================================================ */
+
+.st-key-ev-input-panel,
+.st-key-ev-process-panel {
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 30px !important;
+    border: 1px solid rgba(255,255,255,.84) !important;
+    background:
+        radial-gradient(circle at 86% 16%, rgba(24,200,255,.22), transparent 22%),
+        radial-gradient(circle at 8% 92%, rgba(22,119,255,.15), transparent 30%),
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.76),
+            rgba(255,255,255,.42)
+        ) !important;
+    box-shadow:
+        0 24px 70px rgba(30,64,175,.12),
+        inset 0 1px 0 rgba(255,255,255,.95) !important;
+    backdrop-filter: blur(26px) saturate(155%) !important;
+    -webkit-backdrop-filter: blur(26px) saturate(155%) !important;
+}
+
+.st-key-ev-input-panel > div:first-child,
+.st-key-ev-process-panel > div:first-child {
+    position: relative;
+    z-index: 1;
+    background: transparent !important;
+    border: 0 !important;
+}
+
+.st-key-ev-input-panel::before,
+.st-key-ev-process-panel::before {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    right: -55px;
+    bottom: -85px;
+    border-radius: 50%;
+    background: rgba(24,200,255,.14);
+    filter: blur(12px);
+    pointer-events: none;
+}
+
+.st-key-ev-input-panel::after,
+.st-key-ev-process-panel::after {
+    content: "";
+    position: absolute;
+    width: 55%;
+    height: 1px;
+    left: 10%;
+    top: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.95),
+        transparent
+    );
+    pointer-events: none;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.ev-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.84);
+    border-radius: 30px;
+    padding: 32px;
+    margin: 4px 0 24px;
+    background:
+        radial-gradient(circle at 86% 16%, rgba(24,200,255,.22), transparent 22%),
+        radial-gradient(circle at 8% 92%, rgba(22,119,255,.15), transparent 30%),
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.76),
+            rgba(255,255,255,.42)
+        );
+    box-shadow:
+        0 24px 70px rgba(30,64,175,.12),
+        inset 0 1px 0 rgba(255,255,255,.95);
+    backdrop-filter: blur(26px) saturate(155%);
+    -webkit-backdrop-filter: blur(26px) saturate(155%);
+}
+
+.ev-hero::before {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    right: -55px;
+    bottom: -85px;
+    border-radius: 50%;
+    background: rgba(24,200,255,.14);
+    filter: blur(12px);
+}
+
+.ev-hero::after {
+    content: "";
+    position: absolute;
+    width: 55%;
+    height: 1px;
+    left: 10%;
+    top: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.95),
+        transparent
+    );
+}
+
+.ev-kicker {
+    color: #1677ff;
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    margin-bottom: 9px;
+}
+
+.ev-hero-title {
+    font-size: clamp(25px, 3vw, 38px);
+    font-weight: 850;
+    letter-spacing: -1.2px;
+    margin-bottom: 8px;
+}
+
+.ev-hero-text {
+    max-width: 760px;
+    color: #64748b;
+    line-height: 1.65;
+    font-size: 15px;
+}
+
+.workflow {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-top: 21px;
+}
+
+.workflow-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 13px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.55);
+    border: 1px solid rgba(255,255,255,.82);
+    box-shadow:
+        0 7px 20px rgba(30,64,175,.06),
+        inset 0 1px 0 rgba(255,255,255,.9);
+    color: #1455ad;
+    font-size: 12px;
+    font-weight: 780;
+    letter-spacing: .01em;
+    backdrop-filter: blur(12px);
+}
+
+.workflow-step b {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(37,99,235,.10);
+    border: 1px solid rgba(37,99,235,.14);
+    color: #2563eb;
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: .02em;
+}
+
+.workflow-arrow {
+    color: #8aa2bd;
+    font-weight: 800;
+}
+
+/* ============================================================
+   ANALYSIS
+   ============================================================ */
+
+.ev-analysis {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.86);
+    border-radius: 24px;
+    padding: 21px;
+    margin: 18px 0;
+    background:
+        radial-gradient(circle at 90% 50%, rgba(24,200,255,.13), transparent 25%),
+        rgba(255,255,255,.55);
+    box-shadow:
+        0 16px 45px rgba(30,64,175,.08),
+        inset 0 1px 0 rgba(255,255,255,.92);
+    backdrop-filter: blur(20px) saturate(145%);
+}
+
+.ev-analysis::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -30%;
+    width: 25%;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #18c8ff,
+        #1677ff,
+        transparent
+    );
+    box-shadow: 0 0 18px rgba(24,200,255,.55);
+    animation: ev-glass-scan 1.8s ease-in-out infinite;
+}
+
+@keyframes ev-glass-scan {
+    0% { left: -30%; opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { left: 105%; opacity: 0; }
+}
+
+.ev-analysis-label {
+    color: #1677ff;
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+}
+
+.ev-analysis-title {
+    font-size: 19px;
+    font-weight: 800;
+    margin-top: 5px;
+}
+
+.ev-progress {
+    height: 6px;
+    margin-top: 15px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(148,163,184,.16);
+}
+
+.ev-progress > div {
+    width: 68%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #1677ff, #18c8ff);
+    box-shadow: 0 0 14px rgba(24,200,255,.35);
+    animation: ev-progress 1.6s ease-in-out infinite;
+    transform-origin: left;
+}
+
+/* Главный вывод */
+.key-verdict {
+    margin: 12px 0 18px;
+    padding: 28px 34px;
+    border: 1px solid rgba(255,255,255,.9);
+    border-left: 8px solid #1677ff;
+    border-radius: 32px;
+    background:
+        radial-gradient(circle at 92% 14%, rgba(24,200,255,.18), transparent 25%),
+        linear-gradient(135deg, rgba(255,255,255,.88), rgba(224,242,254,.75));
+    box-shadow: 0 18px 42px rgba(30,64,175,.1), inset 0 1px 0 rgba(255,255,255,.96);
+}
+
+.key-verdict-badge {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: #1766d3;
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: 2px;
+}
+
+.key-verdict-title {
+    margin-bottom: 12px;
+    color: #172033;
+    font-size: 26px;
+    font-weight: 850;
+    letter-spacing: -.7px;
+}
+
+.key-verdict-text {
+    color: #172033;
+    color: #465d7c;
+    font-size: 17px;
+    font-weight: 650;
+    line-height: 1.58;
+}
+
+@keyframes ev-progress {
+    0%,100% {
+        transform: scaleX(.22);
+        opacity: .65;
     }
-    .stApp {
-        min-height: 100vh;
-        background:
-            radial-gradient(circle at 8% 10%, rgba(22,119,255,.16), transparent 27%),
-            radial-gradient(circle at 90% 16%, rgba(24,200,255,.14), transparent 25%),
-            radial-gradient(circle at 55% 90%, rgba(99,102,241,.10), transparent 30%),
-            linear-gradient(135deg, #f4f8ff 0%, #eef5ff 48%, #f8fbff 100%);
-        color: var(--ev-ink);
+
+    50% {
+        transform: scaleX(1);
+        opacity: 1;
     }
-    .stApp::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        opacity: .27;
-        background-image:
-            radial-gradient(circle, rgba(22,119,255,.20) 1px, transparent 1.4px),
-            linear-gradient(120deg, transparent 49.7%, rgba(24,200,255,.035) 50%, transparent 50.3%);
-        background-size: 44px 44px, 190px 190px;
-        mask-image: linear-gradient(to bottom, black 0%, transparent 82%);
-    }
-    [data-testid="stHeader"] {
-        background: rgba(244,248,255,.58);
-        backdrop-filter: blur(18px);
-    }
-    .block-container {
-        max-width: 1420px;
-        padding-top: 5.2rem;
-        padding-bottom: 4rem;
-        position: relative;
-        z-index: 1;
-    }
-    .main-title {
-        font-size: clamp(31px, 4vw, 48px);
-        font-weight: 850;
-        letter-spacing: -1.8px;
-        line-height: 1.04;
-        margin-bottom: 7px;
-        background: linear-gradient(100deg, #07111f 5%, #1677ff 52%, #00a9dc 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .subtitle {
-        font-size: 16px;
-        color: var(--ev-muted);
-        margin-bottom: 22px;
-    }
-    /* SIDEBAR GLASS PANEL */
-    [data-testid="stSidebar"] {
-        background: transparent !important;
-    }
-    [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
-        height: 100% !important;
-        max-height: 100vh !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        scrollbar-width: thin;
-    }
-    [data-testid="stSidebar"] [data-testid="stSidebarContent"]::-webkit-scrollbar {
-        width: 7px;
-    }
-    [data-testid="stSidebar"] [data-testid="stSidebarContent"]::-webkit-scrollbar-thumb {
-        background: rgba(100,116,139,.28);
-        border-radius: 999px;
-    }
-    [data-testid="stSidebar"] > div:first-child {
-        background:
-            linear-gradient(135deg, rgba(245,249,255,.84), rgba(232,240,252,.70)) !important;
-        border-right: 1px solid rgba(255,255,255,.94);
-        border-top-right-radius: 30px;
-        border-bottom-right-radius: 30px;
-        box-shadow:
-            10px 0 34px rgba(30,64,175,.07),
-            inset -1px 0 0 rgba(120,160,220,.08);
-        backdrop-filter: blur(24px) saturate(145%);
-        -webkit-backdrop-filter: blur(24px) saturate(145%);
-        overflow: hidden;
-    }
-    .section-kicker {
-        color: #1677ff;
-        font-size: 11px;
-        font-weight: 850;
-        letter-spacing: 2.2px;
-        text-transform: uppercase;
-        margin-bottom: 9px;
-    }
-    .glass-section-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 21px;
-    }
-    .glass-section-number {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 30px;
-        height: 30px;
-        flex: 0 0 30px;
-        border-radius: 50%;
-        background: rgba(37,99,235,.10);
-        border: 1px solid rgba(37,99,235,.15);
-        color: #2563eb;
-        font-size: 10px;
-        font-weight: 850;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
-    .glass-section-name {
-        font-size: clamp(25px, 3vw, 34px);
-        font-weight: 850;
-        letter-spacing: -1.2px;
-        line-height: 1.12;
-        color: #07111f;
-    }
-    .process-step {
-        display: grid;
-        grid-template-columns: 32px 1fr;
-        column-gap: 12px;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(148,163,184,.13);
-    }
-    .process-step:last-child {
-        border-bottom: 0;
-        padding-bottom: 2px;
-    }
-    .process-number {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: rgba(255,255,255,.62);
-        border: 1px solid rgba(255,255,255,.88);
-        color: #2563eb;
-        font-size: 10px;
-        font-weight: 850;
-        box-shadow:
-            0 5px 16px rgba(30,64,175,.07),
-            inset 0 1px 0 rgba(255,255,255,.9);
-    }
-    .process-title {
-        font-size: 14px;
-        font-weight: 800;
-        color: #172033;
-        margin-bottom: 4px;
-    }
-    .process-description {
-        font-size: 12px;
-        line-height: 1.55;
-        color: #718096;
-    }
-    /* LIQUID GLASS — the two main panels use the hero recipe. */
-    .st-key-ev-input-panel,
-    .st-key-ev-process-panel {
-        position: relative !important;
-        overflow: hidden !important;
-        border-radius: 30px !important;
-        border: 1px solid rgba(255,255,255,.84) !important;
-        background:
-            radial-gradient(circle at 86% 16%, rgba(24,200,255,.22), transparent 22%),
-            radial-gradient(circle at 8% 92%, rgba(22,119,255,.15), transparent 30%),
-            linear-gradient(135deg, rgba(255,255,255,.76), rgba(255,255,255,.42)) !important;
-        box-shadow:
-            0 24px 70px rgba(30,64,175,.12),
-            inset 0 1px 0 rgba(255,255,255,.95) !important;
-        backdrop-filter: blur(26px) saturate(155%) !important;
-        -webkit-backdrop-filter: blur(26px) saturate(155%) !important;
-    }
-    .st-key-ev-input-panel > div:first-child,
-    .st-key-ev-process-panel > div:first-child {
-        position: relative;
-        z-index: 1;
-        background: transparent !important;
-        border: 0 !important;
-    }
-    .st-key-ev-input-panel::before,
-    .st-key-ev-process-panel::before {
-        content: "";
-        position: absolute;
-        width: 180px;
-        height: 180px;
-        right: -55px;
-        bottom: -85px;
-        border-radius: 50%;
-        background: rgba(24,200,255,.14);
-        filter: blur(12px);
-        pointer-events: none;
-    }
-    .st-key-ev-input-panel::after,
-    .st-key-ev-process-panel::after {
-        content: "";
-        position: absolute;
-        width: 55%;
-        height: 1px;
-        left: 10%;
-        top: 0;
-        background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(255,255,255,.95),
+}
+
+.score-number {
+    font-size: 58px;
+    font-weight: 850;
+    line-height: 1;
+    margin: 8px 0 0;
+    letter-spacing: -2px;
+}
+
+.verdict-title {
+    font-size: 19px;
+    font-weight: 780;
+    line-height: 1.4;
+}
+
+/* ============================================================
+   SCALE
+   ============================================================ */
+
+.scale {
+    position: relative;
+    width: 100%;
+    height: 14px;
+    margin-top: 25px;
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        #ef4444 0%,
+        #f97316 25%,
+        #facc15 50%,
+        #a3e635 75%,
+        #22c55e 100%
+    );
+    box-shadow:
+        inset 0 1px 3px rgba(15,23,42,.16),
+        0 5px 18px rgba(22,119,255,.08);
+}
+
+.scale-marker {
+    position: absolute;
+    left: var(--score);
+    top: 50%;
+    width: 5px;
+    height: 28px;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 1px solid rgba(255,255,255,.95);
+    border-radius: 5px;
+    box-shadow:
+        0 2px 8px rgba(0,0,0,.25),
+        0 0 0 4px rgba(255,255,255,.18);
+}
+
+.scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    opacity: .58;
+}
+
+.scale-description {
+    margin-top: 18px;
+    font-size: 11px;
+    line-height: 1.55;
+    opacity: .58;
+}
+
+/* ============================================================
+   HISTORY
+   ============================================================ */
+
+.history-analysis-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #172033;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.history-status-dot {
+    width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(148,163,184,.10);
+}
+
+.history-status-dot.green {
+    background: #22c55e;
+}
+
+.history-status-dot.orange {
+    background: #f59e0b;
+}
+
+.history-status-dot.red {
+    background: #ef4444;
+}
+
+/* ============================================================
+   INGREDIENTS
+   ============================================================ */
+
+.ingredient-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 12px minmax(190px, .85fr) minmax(0, 1.6fr);
+    gap: 20px;
+    align-items: center;
+    overflow: hidden;
+    margin: 10px 0;
+    padding: 19px 22px;
+    border: 1px solid rgba(255,255,255,.82);
+    border-radius: 20px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.66),
+            rgba(255,255,255,.38)
+        );
+    box-shadow:
+        0 10px 28px rgba(30,64,175,.06),
+        inset 0 1px 0 rgba(255,255,255,.9);
+    backdrop-filter: blur(16px) saturate(135%);
+    -webkit-backdrop-filter: blur(16px) saturate(135%);
+}
+
+.ingredient-row::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 5px;
+    background: var(--ingredient-color, #f59e0b);
+}
+
+.ingredient-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ingredient-color, #f59e0b);
+    box-shadow:
+        0 0 0 5px color-mix(
+            in srgb,
+            var(--ingredient-color, #f59e0b) 14%,
             transparent
         );
-        pointer-events: none;
+}
+
+.ingredient-name {
+    color: #172033;
+    font-size: 16px;
+    font-weight: 850;
+    line-height: 1.35;
+}
+
+.ingredient-type {
+    margin-top: 4px;
+    color: #5d7490;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: .02em;
+}
+
+.ingredient-explanation {
+    color: #394963;
+    font-size: 14px;
+    line-height: 1.58;
+}
+
+.input-intro {
+    margin: -2px 0 18px;
+    color: #61738d;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+/* ============================================================
+   RESULT
+   ============================================================ */
+
+.result-hero {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 28px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    margin: 14px 0 24px;
+    padding: 28px 32px;
+    border: 1px solid rgba(255,255,255,.88);
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at 93% 16%, rgba(24,200,255,.25), transparent 30%),
+        radial-gradient(circle at 6% 100%, rgba(22,119,255,.16), transparent 36%),
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.78),
+            rgba(255,255,255,.43)
+        );
+    box-shadow:
+        0 22px 60px rgba(30,64,175,.11),
+        inset 0 1px 0 rgba(255,255,255,.95);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    animation: ev-fade-up .45s ease both;
+}
+
+.result-score {
+    display: grid;
+    place-items: center;
+    width: 158px;
+    height: 158px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.95);
+    background: rgba(255,255,255,.50);
+    box-shadow:
+        0 14px 34px rgba(22,119,255,.12),
+        inset 0 1px 0 rgba(255,255,255,.95);
+}
+
+.result-score-value {
+    color: #10203c;
+    font-size: 54px;
+    font-weight: 850;
+    letter-spacing: -3px;
+    line-height: .9;
+    text-align: center;
+}
+
+.result-score-value span {
+    display: block;
+    margin-top: 8px;
+    color: #60738e;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+}
+
+.result-kicker {
+    color: #1677ff;
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.result-title {
+    margin: 6px 0 8px;
+    color: #0b1220;
+    font-size: clamp(22px, 2.5vw, 31px);
+    font-weight: 850;
+    letter-spacing: -1px;
+    line-height: 1.15;
+}
+
+.result-summary {
+    color: #566b86;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.result-meter {
+    height: 8px;
+    margin: 16px 0 13px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(148,163,184,.16);
+}
+
+.result-meter > span {
+    display: block;
+    width: var(--score);
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #1677ff, #18c8ff);
+    box-shadow: 0 0 16px rgba(24,200,255,.4);
+    animation: ev-score-fill .9s ease both;
+    transform-origin: left;
+}
+
+.result-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.result-fact {
+    padding: 7px 10px;
+    border: 1px solid rgba(255,255,255,.78);
+    border-radius: 999px;
+    background: rgba(255,255,255,.45);
+    color: #4b627f;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+/* ============================================================
+   КБЖУ — СХЕМА
+   ============================================================ */
+
+.nutrition-card {
+    position: relative;
+    overflow: hidden;
+    margin: 18px 0 20px;
+    padding: 20px 22px 10px;
+    border: 1px solid rgba(255,255,255,.88);
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at 50% 48%, rgba(24,200,255,.15), transparent 29%),
+        linear-gradient(135deg, rgba(255,255,255,.78), rgba(236,248,255,.68));
+    box-shadow: 0 14px 36px rgba(30,64,175,.08), inset 0 1px 0 rgba(255,255,255,.94);
+}
+
+.nutrition-kicker {
+    color: #1677ff;
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: 1.7px;
+}
+
+.nutrition-title {
+    margin-top: 3px;
+    color: #172033;
+    font-size: 20px;
+    font-weight: 850;
+}
+
+.nutrition-map {
+    position: relative;
+    height: 255px;
+    margin: 0 auto;
+    max-width: 640px;
+}
+
+.nutrition-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.nutrition-line {
+    stroke: rgba(22,119,255,.45);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+}
+
+.nutrition-center,
+.nutrition-node {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.nutrition-center {
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    width: 96px;
+    height: 96px;
+    transform: translate(-50%,-50%);
+    flex-direction: column;
+    border: 6px solid #1677ff;
+    border-radius: 50%;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 8px 22px rgba(22,119,255,.18), inset 0 1px 0 #fff;
+}
+
+.nutrition-center strong {
+    color: #172033;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.05;
+}
+
+.nutrition-center span {
+    color: #667085;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.nutrition-node {
+    left: var(--node-x);
+    top: var(--node-y);
+    z-index: 1;
+    width: 122px;
+    min-height: 57px;
+    transform: translate(-50%,-50%);
+    flex-direction: column;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,.9);
+    border-radius: 16px;
+    background: rgba(255,255,255,.82);
+    box-shadow: 0 8px 20px rgba(30,64,175,.08);
+}
+
+.nutrition-node-label {
+    color: #667085;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.nutrition-node-value {
+    margin-top: 2px;
+    color: #172033;
+    font-size: 16px;
+    font-weight: 900;
+}
+
+/* ============================================================
+   ALLERGY / RECOMMENDATION
+   ============================================================ */
+
+.allergy-card,
+.allergy-clear,
+.ai-recommendation {
+    position: relative;
+    overflow: hidden;
+    margin: 10px 0;
+    padding: 22px 24px;
+    border: 1px solid rgba(255,255,255,.84);
+    border-radius: 22px;
+    background: rgba(255,255,255,.48);
+    box-shadow:
+        0 12px 32px rgba(30,64,175,.06),
+        inset 0 1px 0 rgba(255,255,255,.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.allergy-card {
+    border-left: 5px solid #f59e0b;
+}
+
+.allergy-card.high {
+    border-left-color: #ef4444;
+}
+
+.allergy-card.low {
+    border-left-color: #18a86b;
+}
+
+.allergy-label {
+    color: #b56e00;
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.allergy-card.high .allergy-label {
+    color: #d83737;
+}
+
+.allergy-card.low .allergy-label {
+    color: #188756;
+}
+
+.allergy-name {
+    margin: 5px 0 7px;
+    color: #142038;
+    font-size: 21px;
+    font-weight: 850;
+    line-height: 1.28;
+}
+
+.allergy-text,
+.recommendation-text {
+    color: #40536c;
+    font-size: 14px;
+    line-height: 1.62;
+}
+
+.allergy-clear {
+    border-left: 5px solid #22c55e;
+    color: #176a46;
+    font-weight: 750;
+}
+
+.ai-recommendation {
+    border-left: 5px solid #1677ff;
+    background:
+        linear-gradient(
+            100deg,
+            rgba(255,255,255,.68),
+            rgba(224,249,255,.62)
+        );
+}
+
+.ai-recommendation-title {
+    color: #1162d1;
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+}
+
+/* ============================================================
+   POSITIVE / ATTENTION CARDS
+   ============================================================ */
+
+.insight-list {
+    margin: 8px 0 0;
+    padding-left: 19px;
+    color: #34455e;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.insight-card {
+    height: 100%;
+    padding: 18px 20px;
+    border: 1px solid rgba(255,255,255,.82);
+    border-radius: 20px;
+    background: rgba(255,255,255,.42);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.insight-card-title {
+    color: #172033;
+    font-size: 16px;
+    font-weight: 850;
+}
+
+/* Positive */
+
+.insight-card-positive {
+    border: 2px solid #22c55e;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.58),
+            rgba(220,252,231,.48)
+        );
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.92),
+        0 10px 30px rgba(34,197,94,.11);
+}
+
+.insight-card-positive .insight-card-title {
+    color: #15803d;
+}
+
+/* Attention */
+
+.insight-card-attention-yellow {
+    border: 2px solid #f59e0b;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.58),
+            rgba(254,243,199,.58)
+        );
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.92),
+        0 10px 30px rgba(245,158,11,.14);
+}
+
+.insight-card-attention-yellow .insight-card-title {
+    color: #b45309;
+}
+
+.insight-card-attention-red {
+    border: 2px solid #ef4444;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.58),
+            rgba(254,226,226,.52)
+        );
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.92),
+        0 10px 30px rgba(239,68,68,.14);
+}
+
+.insight-card-attention-red .insight-card-title {
+    color: #dc2626;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.stButton > button {
+    border-radius: 16px !important;
+    border: 1px solid rgba(255,255,255,.85) !important;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.78),
+            rgba(255,255,255,.46)
+        ) !important;
+    color: #1455ad !important;
+    box-shadow:
+        0 10px 28px rgba(30,64,175,.08),
+        inset 0 1px 0 rgba(255,255,255,.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease;
+}
+
+.stButton > button:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 14px 32px rgba(30,64,175,.13),
+        inset 0 1px 0 rgba(255,255,255,1);
+}
+
+.stButton > button[kind="primary"] {
+    color: white !important;
+    border-color: rgba(255,255,255,.42) !important;
+    background:
+        linear-gradient(
+            135deg,
+            #1677ff,
+            #12bde9
+        ) !important;
+    box-shadow:
+        0 12px 30px rgba(22,119,255,.25),
+        inset 0 1px 0 rgba(255,255,255,.35);
+}
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+
+div[data-baseweb="input"],
+div[data-baseweb="textarea"],
+div[data-baseweb="select"],
+[data-testid="stFileUploaderDropzone"] {
+    border-radius: 18px !important;
+}
+
+div[data-baseweb="input"] > div,
+div[data-baseweb="textarea"] > div,
+div[data-baseweb="select"] > div,
+[data-testid="stFileUploaderDropzone"] {
+    background: rgba(255,255,255,.52) !important;
+    border-color: rgba(255,255,255,.82) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    backdrop-filter: blur(12px);
+}
+
+[data-testid="stFileUploaderDropzone"]:hover {
+    border-color: rgba(22,119,255,.30) !important;
+    box-shadow: 0 10px 30px rgba(22,119,255,.08);
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes ev-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
-    .ev-hero {
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(255,255,255,.84);
-        border-radius: 30px;
-        padding: 32px;
-        margin: 4px 0 24px;
-        background:
-            radial-gradient(circle at 86% 16%, rgba(24,200,255,.22), transparent 22%),
-            radial-gradient(circle at 8% 92%, rgba(22,119,255,.15), transparent 30%),
-            linear-gradient(135deg, rgba(255,255,255,.76), rgba(255,255,255,.42));
-        box-shadow:
-            0 24px 70px rgba(30,64,175,.12),
-            inset 0 1px 0 rgba(255,255,255,.95);
-        backdrop-filter: blur(26px) saturate(155%);
-        -webkit-backdrop-filter: blur(26px) saturate(155%);
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
-    .ev-hero::before {
-        content: "";
-        position: absolute;
-        width: 180px;
-        height: 180px;
-        right: -55px;
-        bottom: -85px;
-        border-radius: 50%;
-        background: rgba(24,200,255,.14);
-        filter: blur(12px);
+}
+
+@keyframes ev-score-fill {
+    from {
+        transform: scaleX(0);
     }
-    .ev-hero::after {
-        content: "";
-        position: absolute;
-        width: 55%;
-        height: 1px;
-        left: 10%;
-        top: 0;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+
+    to {
+        transform: scaleX(1);
     }
-    .ev-kicker {
-        color: #1677ff;
-        font-size: 11px;
-        font-weight: 850;
-        letter-spacing: 2.2px;
-        text-transform: uppercase;
-        margin-bottom: 9px;
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 760px) {
+
+    .block-container {
+        padding-top: 1rem;
+        padding-left: .8rem;
+        padding-right: .8rem;
     }
-    .ev-hero-title {
-        font-size: clamp(25px, 3vw, 38px);
-        font-weight: 850;
-        letter-spacing: -1.2px;
-        margin-bottom: 8px;
+
+    .main-title {
+        margin-top: 4rem !important;
     }
-    .ev-hero-text {
-        max-width: 760px;
-        color: #64748b;
-        line-height: 1.65;
-        font-size: 15px;
+
+    .ev-hero,
+    .st-key-ev-input-panel,
+    .st-key-ev-process-panel {
+        padding: 22px !important;
+        border-radius: 23px !important;
     }
+
     .workflow {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        flex-wrap: wrap;
-        margin-top: 21px;
+        gap: 6px;
     }
-    .workflow-step {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 9px 13px;
-        border-radius: 999px;
-        background: rgba(255,255,255,.55);
-        border: 1px solid rgba(255,255,255,.82);
-        box-shadow: 0 7px 20px rgba(30,64,175,.06), inset 0 1px 0 rgba(255,255,255,.9);
-        color: #1455ad;
-        font-size: 12px;
-        font-weight: 780;
-        letter-spacing: .01em;
-        backdrop-filter: blur(12px);
-    }
-    .workflow-step b {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: rgba(37,99,235,.10);
-        border: 1px solid rgba(37,99,235,.14);
-        color: #2563eb;
-        font-size: 9px;
-        font-weight: 850;
-        letter-spacing: .02em;
-    }
+
     .workflow-arrow {
-        color: #8aa2bd;
-        font-weight: 800;
+        display: none;
     }
-    .ev-analysis {
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(255,255,255,.86);
-        border-radius: 24px;
-        padding: 21px;
-        margin: 18px 0;
-        background:
-            radial-gradient(circle at 90% 50%, rgba(24,200,255,.13), transparent 25%),
-            rgba(255,255,255,.55);
-        box-shadow:
-            0 16px 45px rgba(30,64,175,.08),
-            inset 0 1px 0 rgba(255,255,255,.92);
-        backdrop-filter: blur(20px) saturate(145%);
+
+    .workflow-step {
+        font-size: 11px;
+        padding: 8px 10px;
     }
-    .ev-analysis::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -30%;
-        width: 25%;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #18c8ff, #1677ff, transparent);
-        box-shadow: 0 0 18px rgba(24,200,255,.55);
-        animation: ev-glass-scan 1.8s ease-in-out infinite;
-    }
-    @keyframes ev-glass-scan {
-        0% { left: -30%; opacity: 0; }
-        15% { opacity: 1; }
-        85% { opacity: 1; }
-        100% { left: 105%; opacity: 0; }
-    }
-    .ev-analysis-label {
-        color: #1677ff;
-        font-size: 10px;
-        font-weight: 850;
-        letter-spacing: 1.8px;
-        text-transform: uppercase;
-    }
-    .ev-analysis-title {
-        font-size: 19px;
-        font-weight: 800;
-        margin-top: 5px;
-    }
-    .ev-progress {
-        height: 6px;
-        margin-top: 15px;
-        border-radius: 999px;
-        overflow: hidden;
-        background: rgba(148,163,184,.16);
-    }
-    .ev-progress > div {
-        width: 68%;
-        height: 100%;
-        border-radius: inherit;
-        background: linear-gradient(90deg, #1677ff, #18c8ff);
-        box-shadow: 0 0 14px rgba(24,200,255,.35);
-        animation: ev-progress 1.6s ease-in-out infinite;
-        transform-origin: left;
-    }
-    @keyframes ev-progress {
-        0%,100% { transform: scaleX(.22); opacity: .65; }
-        50% { transform: scaleX(1); opacity: 1; }
-    }
+
     .score-number {
-        font-size: 58px;
-        font-weight: 850;
-        line-height: 1;
-        margin: 8px 0 0;
-        letter-spacing: -2px;
+        font-size: 48px;
     }
-    .verdict-title {
-        font-size: 19px;
-        font-weight: 780;
-        line-height: 1.4;
-    }
-    .scale {
-        position: relative;
-        width: 100%;
-        height: 14px;
-        margin-top: 25px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #ef4444 0%, #f97316 25%, #facc15 50%, #a3e635 75%, #22c55e 100%);
-        box-shadow: inset 0 1px 3px rgba(15,23,42,.16), 0 5px 18px rgba(22,119,255,.08);
-    }
-    .scale-marker {
-        position: absolute;
-        left: var(--score);
-        top: 50%;
-        width: 5px;
-        height: 28px;
-        transform: translate(-50%, -50%);
-        background: white;
-        border: 1px solid rgba(255,255,255,.95);
-        border-radius: 5px;
-        box-shadow: 0 2px 8px rgba(0,0,0,.25), 0 0 0 4px rgba(255,255,255,.18);
-    }
-    .scale-labels {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 8px;
-        font-size: 11px;
-        opacity: .58;
-    }
-    .scale-description {
-        margin-top: 18px;
-        font-size: 11px;
-        line-height: 1.55;
-        opacity: .58;
-    }
-    .history-analysis-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #172033;
-        font-size: 15px;
-        font-weight: 800;
-        line-height: 1.4;
-    }
-    .history-status-dot {
-        width: 9px;
-        height: 9px;
-        flex: 0 0 9px;
-        border-radius: 50%;
-        box-shadow: 0 0 0 4px rgba(148,163,184,.10);
-    }
-    .history-status-dot.green { background: #22c55e; }
-    .history-status-dot.orange { background: #f59e0b; }
-    .history-status-dot.red { background: #ef4444; }
+
     .ingredient-row {
-        position: relative;
-        display: grid;
-        grid-template-columns: 12px minmax(190px, .85fr) minmax(0, 1.6fr);
-        gap: 20px;
-        align-items: center;
-        overflow: hidden;
-        margin: 10px 0;
-        padding: 19px 22px;
-        border: 1px solid rgba(255,255,255,.82);
-        border-radius: 20px;
-        background: linear-gradient(135deg, rgba(255,255,255,.66), rgba(255,255,255,.38));
-        box-shadow: 0 10px 28px rgba(30,64,175,.06), inset 0 1px 0 rgba(255,255,255,.9);
-        backdrop-filter: blur(16px) saturate(135%);
-        -webkit-backdrop-filter: blur(16px) saturate(135%);
+        grid-template-columns: 12px 1fr;
+        gap: 13px;
+        padding: 17px;
     }
-    .ingredient-row::before {
-        content: "";
-        position: absolute;
-        inset: 0 auto 0 0;
-        width: 5px;
-        background: var(--ingredient-color, #f59e0b);
-    }
-    .ingredient-status {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: var(--ingredient-color, #f59e0b);
-        box-shadow: 0 0 0 5px color-mix(in srgb, var(--ingredient-color, #f59e0b) 14%, transparent);
-    }
-    .ingredient-name {
-        color: #172033;
-        font-size: 16px;
-        font-weight: 850;
-        line-height: 1.35;
-    }
-    .ingredient-type {
-        margin-top: 4px;
-        color: #5d7490;
-        font-size: 12px;
-        font-weight: 750;
-        letter-spacing: .02em;
-    }
+
     .ingredient-explanation {
-        color: #394963;
-        font-size: 14px;
-        line-height: 1.58;
+        grid-column: 2;
     }
-    .input-intro {
-        margin: -2px 0 18px;
-        color: #61738d;
-        font-size: 13px;
-        line-height: 1.55;
-    }
+
     .result-hero {
-        display: grid;
-        grid-template-columns: 190px 1fr;
-        gap: 28px;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
-        margin: 14px 0 24px;
-        padding: 28px 32px;
-        border: 1px solid rgba(255,255,255,.88);
-        border-radius: 28px;
-        background:
-            radial-gradient(circle at 93% 16%, rgba(24,200,255,.25), transparent 30%),
-            radial-gradient(circle at 6% 100%, rgba(22,119,255,.16), transparent 36%),
-            linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.43));
-        box-shadow: 0 22px 60px rgba(30,64,175,.11), inset 0 1px 0 rgba(255,255,255,.95);
-        backdrop-filter: blur(24px) saturate(150%);
-        -webkit-backdrop-filter: blur(24px) saturate(150%);
-        animation: ev-fade-up .45s ease both;
+        grid-template-columns: 1fr;
+        gap: 19px;
+        padding: 22px;
     }
+
     .result-score {
-        display: grid;
-        place-items: center;
-        width: 158px;
-        height: 158px;
-        border-radius: 50%;
-        border: 1px solid rgba(255,255,255,.95);
-        background: rgba(255,255,255,.50);
-        box-shadow: 0 14px 34px rgba(22,119,255,.12), inset 0 1px 0 rgba(255,255,255,.95);
+        width: 126px;
+        height: 126px;
     }
+
     .result-score-value {
-        color: #10203c;
-        font-size: 54px;
-        font-weight: 850;
-        letter-spacing: -3px;
-        line-height: .9;
-        text-align: center;
+        font-size: 44px;
     }
-    .result-score-value span {
-        display: block;
-        margin-top: 8px;
-        color: #60738e;
+
+    .result-facts {
+        gap: 6px;
+    }
+
+    .result-fact {
         font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 1.4px;
     }
-    .result-kicker {
-        color: #1677ff;
-        font-size: 11px;
-        font-weight: 850;
-        letter-spacing: 2px;
-        text-transform: uppercase;
+
+    .allergy-card,
+    .allergy-clear,
+    .ai-recommendation {
+        padding: 18px;
+        border-radius: 18px;
     }
-    .result-title {
-        margin: 6px 0 8px;
-        color: #0b1220;
-        font-size: clamp(22px, 2.5vw, 31px);
-        font-weight: 850;
-        letter-spacing: -1px;
-        line-height: 1.15;
+
+    .allergy-name {
+        font-size: 18px;
     }
-    .result-summary { color: #566b86; font-size: 14px; line-height: 1.6; }
-    .result-meter { height: 8px; margin: 16px 0 13px; overflow: hidden; border-radius: 999px; background: rgba(148,163,184,.16); }
-    .result-meter > span { display: block; width: var(--score); height: 100%; border-radius: inherit; background: linear-gradient(90deg, #1677ff, #18c8ff); box-shadow: 0 0 16px rgba(24,200,255,.4); animation: ev-score-fill .9s ease both; transform-origin: left; }
-    .result-facts { display: flex; flex-wrap: wrap; gap: 8px; }
-    .result-fact { padding: 7px 10px; border: 1px solid rgba(255,255,255,.78); border-radius: 999px; background: rgba(255,255,255,.45); color: #4b627f; font-size: 12px; font-weight: 750; }
-    .allergy-card, .allergy-clear, .ai-recommendation {
-        position: relative;
-        overflow: hidden;
-        margin: 10px 0;
-        padding: 22px 24px;
-        border: 1px solid rgba(255,255,255,.84);
-        border-radius: 22px;
-        background: rgba(255,255,255,.48);
-        box-shadow: 0 12px 32px rgba(30,64,175,.06), inset 0 1px 0 rgba(255,255,255,.92);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+
+    .insight-card {
+        padding: 17px 18px;
+        border-radius: 18px;
     }
-    .allergy-card { border-left: 5px solid #f59e0b; }
-    .allergy-card.high { border-left-color: #ef4444; }
-    .allergy-card.low { border-left-color: #18a86b; }
-    .allergy-label { color: #b56e00; font-size: 11px; font-weight: 850; letter-spacing: 1.5px; text-transform: uppercase; }
-    .allergy-card.high .allergy-label { color: #d83737; }
-    .allergy-card.low .allergy-label { color: #188756; }
-    .allergy-name { margin: 5px 0 7px; color: #142038; font-size: 21px; font-weight: 850; line-height: 1.28; }
-    .allergy-text, .recommendation-text { color: #40536c; font-size: 14px; line-height: 1.62; }
-    .allergy-clear { border-left: 5px solid #22c55e; color: #176a46; font-weight: 750; }
-    .ai-recommendation { border-left: 5px solid #1677ff; background: linear-gradient(100deg, rgba(255,255,255,.68), rgba(224,249,255,.62)); }
-    .ai-recommendation-title { color: #1162d1; font-size: 12px; font-weight: 850; letter-spacing: 1.8px; text-transform: uppercase; }
-    .insight-list { margin: 8px 0 0; padding-left: 19px; color: #34455e; font-size: 14px; line-height: 1.65; }
-    .insight-card { height: 100%; padding: 18px 20px; border: 1px solid rgba(255,255,255,.82); border-radius: 20px; background: rgba(255,255,255,.42); box-shadow: inset 0 1px 0 rgba(255,255,255,.9); }
-    .insight-card-title { color: #172033; font-size: 16px; font-weight: 850; }
-    @keyframes ev-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes ev-score-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-    .stButton > button {
-        border-radius: 16px !important;
-        border: 1px solid rgba(255,255,255,.85) !important;
-        background: linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.46)) !important;
-        color: #1455ad !important;
-        box-shadow: 0 10px 28px rgba(30,64,175,.08), inset 0 1px 0 rgba(255,255,255,.95);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        transition: transform .18s ease, box-shadow .18s ease;
+
+    .insight-card-title {
+        font-size: 15px;
     }
-    .stButton > button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 14px 32px rgba(30,64,175,.13), inset 0 1px 0 rgba(255,255,255,1);
+
+    .nutrition-card {
+        padding: 18px 10px 6px;
     }
-    .stButton > button[kind="primary"] {
-        color: white !important;
-        border-color: rgba(255,255,255,.42) !important;
-        background: linear-gradient(135deg, #1677ff, #12bde9) !important;
-        box-shadow: 0 12px 30px rgba(22,119,255,.25), inset 0 1px 0 rgba(255,255,255,.35);
+
+    .nutrition-map {
+        height: 230px;
     }
-    div[data-baseweb="input"],
-    div[data-baseweb="textarea"],
-    div[data-baseweb="select"],
-    [data-testid="stFileUploaderDropzone"] {
-        border-radius: 18px !important;
+
+    .nutrition-node {
+        width: 96px;
+        min-height: 52px;
+        padding: 7px 5px;
+        border-radius: 13px;
     }
-    div[data-baseweb="input"] > div,
-    div[data-baseweb="textarea"] > div,
-    div[data-baseweb="select"] > div,
-    [data-testid="stFileUploaderDropzone"] {
-        background: rgba(255,255,255,.52) !important;
-        border-color: rgba(255,255,255,.82) !important;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
-        backdrop-filter: blur(12px);
+
+    .nutrition-node-value {
+        font-size: 14px;
     }
-    [data-testid="stFileUploaderDropzone"]:hover {
-        border-color: rgba(22,119,255,.30) !important;
-        box-shadow: 0 10px 30px rgba(22,119,255,.08);
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ev-analysis::before,
+    .ev-progress > div,
+    .result-hero,
+    .result-meter > span {
+        animation: none;
     }
-    @media (max-width: 760px) {
-        .block-container { padding-top: 1rem; padding-left: .8rem; padding-right: .8rem; }
-        .main-title { margin-top: 4rem !important; }
-        .ev-hero,
-        .st-key-ev-input-panel,
-        .st-key-ev-process-panel { padding: 22px !important; border-radius: 23px !important; }
-        .workflow { gap: 6px; }
-        .workflow-arrow { display: none; }
-        .workflow-step { font-size: 11px; padding: 8px 10px; }
-        .score-number { font-size: 48px; }
-        .ingredient-row { grid-template-columns: 12px 1fr; gap: 13px; padding: 17px; }
-        .ingredient-explanation { grid-column: 2; }
-        .result-hero { grid-template-columns: 1fr; gap: 19px; padding: 22px; }
-        .result-score { width: 126px; height: 126px; }
-        .result-score-value { font-size: 44px; }
-        .result-facts { gap: 6px; }
-        .result-fact { font-size: 11px; }
-        .allergy-card, .allergy-clear, .ai-recommendation { padding: 18px; border-radius: 18px; }
-        .allergy-name { font-size: 18px; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-        .ev-analysis::before, .ev-progress > div,
-        .result-hero, .result-meter > span { animation: none; }
-    }
+}
+
 </style>
     """,
     unsafe_allow_html=True,
@@ -678,7 +1345,7 @@ st.markdown(
 # ============================================================
 # GEMINI
 # ============================================================
-MODEL_NAME = "gemini-3.5-flash-lite"
+MODEL_NAME = "gemini-3.1-flash-lite"
 def gemini_client():
     return genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 def gemini_text_request(prompt):
@@ -738,6 +1405,18 @@ E-vision.
 16. Не используй red только потому, что название вещества выглядит
     «химическим».
 17. Объяснения должны быть понятными обычному пользователю.
+18. Если рядом с составом на этикетке или в предоставленном тексте
+    явно указана пищевая/энергетическая ценность (калории, белки,
+    жиры, углеводы), перенеси эти значения в поле macros ТОЧНО так,
+    как они указаны в источнике. Никогда не рассчитывай и не
+    оценивай КБЖУ самостоятельно — только если цифры явно присутствуют
+    во входных данных. Если такой информации нет, все значения в
+    macros должны быть null.
+19. Поле ingredients должно содержать КАЖДЫЙ ингредиент, который
+    реально указан в composition_text: не объединяй несколько компонентов
+    в один пункт и не пропускай «обычные» ингредиенты. Сохраняй исходный
+    порядок. Если функция компонента неясна, всё равно добавь его в список
+    с осторожным нейтральным объяснением без догадок.
 КАТЕГОРИИ:
 - Еда
 - Напитки
@@ -860,7 +1539,14 @@ ALLERGY_ALERTS:
     }
   ],
   "allergy_note": "Общая осторожная заметка",
-  "recommendation": "Итоговая рекомендация"
+  "recommendation": "Итоговая рекомендация",
+  "macros": {
+    "calories_kcal": null,
+    "protein_g": null,
+    "fat_g": null,
+    "carbs_g": null,
+    "per": "100 г"
+  }
 }
 Ограничения JSON:
 - score — только целое число от 0 до 100;
@@ -868,6 +1554,10 @@ ALLERGY_ALERTS:
 - confidence — только high, medium или low;
 - status — только green, orange или red;
 - allergy level — high, attention или low;
+- macros — заполняется только если пищевая ценность реально присутствует
+  в исходных данных, иначе все значения внутри должны быть null;
+- ingredients — полный список всех реально распознанных ингредиентов
+  из composition_text, в том же порядке;
 - не добавляй Markdown;
 - не добавляй комментарии вне JSON;
 - не добавляй выдуманные ингредиенты.
@@ -926,46 +1616,66 @@ def normalize_result(data):
     result["composition_complete"] = bool(
         result.get("composition_complete", True)
     )
+    raw_macros = result.get("macros")
+    result["macros"] = raw_macros if isinstance(raw_macros, dict) else None
     return result
 # ============================================================
-# HISTORY
+# HISTORY (личная история на пользователя + общий доступ админа)
 # ============================================================
 HISTORY_FILE = "history.json"
-def load_history():
+MAX_ITEMS_PER_USER = 50
+def load_all_history():
     try:
         with open(HISTORY_FILE, "r", encoding="utf-8") as file:
-            history = json.load(file)
-        return history if isinstance(history, list) else []
+            data = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
-        return []
-def save_history(history):
+        return {}
+    if isinstance(data, dict):
+        return data
+    if isinstance(data, list):
+        # старый формат (общая история без разделения по пользователям)
+        return {"общая история (до обновления)": data}
+    return {}
+def save_all_history(data):
     with open(HISTORY_FILE, "w", encoding="utf-8") as file:
         json.dump(
-            history,
+            data,
             file,
             ensure_ascii=False,
             indent=2,
         )
-def add_to_history(product_text, result):
-    history = load_history()
+def load_user_history(username):
+    return load_all_history().get(username, [])
+def add_to_history(username, product_text, result):
+    data = load_all_history()
+    user_history = data.get(username, [])
     item = {
         "id": hashlib.md5(
-            f"{product_text}|{datetime.now().isoformat()}".encode("utf-8")
+            f"{username}|{product_text}|{datetime.now().isoformat()}".encode("utf-8")
         ).hexdigest(),
         "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
+        "sort_ts": datetime.now().isoformat(),
         "text": product_text,
         "result": result,
     }
-    history.insert(0, item)
-    save_history(history[:50])
-def delete_from_history(item_id):
-    history = load_history()
-    history = [
+    user_history.insert(0, item)
+    data[username] = user_history[:MAX_ITEMS_PER_USER]
+    save_all_history(data)
+def delete_from_history(username, item_id):
+    data = load_all_history()
+    user_history = data.get(username, [])
+    data[username] = [
         item
-        for item in history
+        for item in user_history
         if item.get("id") != item_id
     ]
-    save_history(history)
+    save_all_history(data)
+def clear_user_history(username):
+    data = load_all_history()
+    data[username] = []
+    save_all_history(data)
+def clear_all_history():
+    save_all_history({})
 # ============================================================
 # TEXT ANALYSIS
 # ============================================================
@@ -1044,6 +1754,9 @@ def render_analysis_result(
     confidence = confidence_label(
         result.get("confidence", "medium")
     )
+    recommendation = str(
+        result.get("recommendation", "Рекомендация отсутствует.")
+    )
     st.divider()
     st.subheader(":material/analytics: Результат анализа")
     if saved_date:
@@ -1092,6 +1805,50 @@ def render_analysis_result(
         unsafe_allow_html=True,
     )
     st.caption(summary)
+    # ========================================================
+    # КБЖУ (если реально указано в источнике)
+    # ========================================================
+    macros = result.get("macros") if isinstance(result.get("macros"), dict) else None
+    if macros:
+        nutrition_positions = {
+            "calories_kcal": ("50%", "13%", "50", "43", "50", "25", "Калории", "ккал"),
+            "protein_g": ("18%", "42%", "43", "48", "26", "42", "Белки", "г"),
+            "fat_g": ("82%", "42%", "57", "48", "74", "42", "Жиры", "г"),
+            "carbs_g": ("50%", "87%", "50", "57", "50", "75", "Углеводы", "г"),
+        }
+        macro_labels = []
+        if macros.get("calories_kcal") is not None:
+            macro_labels.append(("calories_kcal", macros.get("calories_kcal")))
+        if macros.get("protein_g") is not None:
+            macro_labels.append(("protein_g", macros.get("protein_g")))
+        if macros.get("fat_g") is not None:
+            macro_labels.append(("fat_g", macros.get("fat_g")))
+        if macros.get("carbs_g") is not None:
+            macro_labels.append(("carbs_g", macros.get("carbs_g")))
+        if macro_labels:
+            per_label = str(macros.get("per") or "100 г")
+            line_html = ""
+            nodes_html = ""
+            for key, value in macro_labels:
+                x, y, x1, y1, x2, y2, label, unit = nutrition_positions[key]
+                line_html += (
+                    f'<line class="nutrition-line" x1="{x1}%" y1="{y1}%" '
+                    f'x2="{x2}%" y2="{y2}%"></line>'
+                )
+                nodes_html += (
+                    f'<div class="nutrition-node" style="--node-x:{x};--node-y:{y};">'
+                    f'<span class="nutrition-node-label">{label}</span>'
+                    f'<span class="nutrition-node-value">{html.escape(str(value))} {unit}</span>'
+                    f"</div>"
+                )
+            st.markdown(
+                f'<div class="nutrition-card"><div class="nutrition-kicker">ПИЩЕВАЯ ЦЕННОСТЬ</div>'
+                f'<div class="nutrition-title">КБЖУ</div><div class="nutrition-map">'
+                f'<svg class="nutrition-lines" viewBox="0 0 100 100" preserveAspectRatio="none">{line_html}</svg>'
+                f'<div class="nutrition-center"><strong>{html.escape(per_label)}</strong><span>основа расчёта</span></div>'
+                f"{nodes_html}</div></div>",
+                unsafe_allow_html=True,
+            )
     if not result.get("composition_complete", True):
         st.warning(
             ":material/warning: Состав может быть неполным или часть информации "
@@ -1242,19 +1999,21 @@ def render_analysis_result(
     # FINAL INFORMATION
     # ========================================================
     st.subheader(":material/fact_check: Итог")
+    st.markdown(
+        f'<div class="key-verdict">'
+        f'<span class="key-verdict-badge">E-VISION · AI-РЕКОМЕНДАЦИЯ</span>'
+        f'<div class="key-verdict-title">Итог для вас</div>'
+        f'<div class="key-verdict-text">{html.escape(recommendation)}</div>'
+        f"</div>",
+        unsafe_allow_html=True,
+    )
     benefits = as_list(
         result.get("benefits", [])
     )
-    recommendation = str(
-        result.get("recommendation", "Рекомендация отсутствует.")
-    )
-    st.markdown(
-        f'<div class="ai-recommendation">'
-        f'<div class="ai-recommendation-title">E-VISION · AI-РЕКОМЕНДАЦИЯ</div>'
-        f'<div class="allergy-name">Итог для вас</div>'
-        f'<div class="recommendation-text">{html.escape(recommendation)}</div>'
-        f"</div>",
-        unsafe_allow_html=True,
+    attention_class = (
+        "insight-card-attention-red"
+        if verdict == "red"
+        else "insight-card-attention-yellow"
     )
     benefits_col, risks_col = st.columns(2, gap="medium")
     benefits_html = "".join(
@@ -1265,14 +2024,16 @@ def render_analysis_result(
     ) or "<li>Существенных замечаний не выделено.</li>"
     with benefits_col:
         st.markdown(
-            '<div class="insight-card"><div class="insight-card-title">'
+            '<div class="insight-card insight-card-positive">'
+            '<div class="insight-card-title">'
             '✓ Положительные стороны</div><ul class="insight-list">'
             f"{benefits_html}</ul></div>",
             unsafe_allow_html=True,
         )
     with risks_col:
         st.markdown(
-            '<div class="insight-card"><div class="insight-card-title">'
+            f'<div class="insight-card {attention_class}">'
+            '<div class="insight-card-title">'
             '⚠ Что требует внимания</div><ul class="insight-list">'
             f"{risks_html}</ul></div>",
             unsafe_allow_html=True,
@@ -1291,6 +2052,70 @@ def render_analysis_result(
                 None,
             )
             st.rerun()
+# ============================================================
+# ЛОГИН (имя для пользователя; отдельный пароль для разработчика)
+# ============================================================
+def restore_username_from_url():
+    saved = st.query_params.get("user")
+    if saved and "username" not in st.session_state and saved != "__developer__":
+        st.session_state.username = str(saved).strip()[:60]
+restore_username_from_url()
+if "username" not in st.session_state:
+    st.markdown(
+        """
+        <div class="ev-hero" style="max-width:520px;margin:64px auto 0;">
+            <div class="ev-kicker">E-VISION · ВХОД</div>
+            <div class="ev-hero-title">Как вас зовут?</div>
+            <div class="ev-hero-text">
+                Введите имя или никнейм — под ним будет сохраняться
+                ваша личная история анализов.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    _, login_col, _ = st.columns([1, 2, 1])
+    with login_col:
+        with st.container(border=True):
+            nickname_input = st.text_input(
+                "Имя / никнейм",
+                placeholder="Например: Aigerim",
+            )
+            if st.button(
+                ":material/login: Войти",
+                type="primary",
+                use_container_width=True,
+            ):
+                clean_name = nickname_input.strip()
+                if not clean_name:
+                    st.warning(
+                        ":material/warning: Введите имя, чтобы продолжить."
+                    )
+                    st.stop()
+                st.session_state.username = clean_name
+                st.session_state.is_admin = False
+                st.query_params["user"] = clean_name
+                st.rerun()
+        with st.expander(":material/admin_panel_settings: Вход разработчика"):
+            developer_password = st.text_input(
+                "Пароль разработчика",
+                type="password",
+                key="developer_login_password",
+            )
+            if st.button(
+                ":material/admin_panel_settings: Войти в панель разработчика",
+                use_container_width=True,
+            ):
+                configured_admin_code = st.secrets.get("ADMIN_CODE", "")
+                if developer_password and developer_password == configured_admin_code:
+                    st.session_state.username = "Разработчик"
+                    st.session_state.is_admin = True
+                    st.query_params["user"] = "__developer__"
+                    st.rerun()
+                st.error(":material/error: Неверный пароль.")
+    st.stop()
+CURRENT_USER = st.session_state.username
+IS_ADMIN = st.session_state.get("is_admin", False)
 # ============================================================
 # HEADER
 # ============================================================
@@ -1347,29 +2172,74 @@ E-vision распознает компоненты, объяснит их наз
     unsafe_allow_html=True,
 )
 # ============================================================
-# SIDEBAR — HISTORY
+# SIDEBAR — ПОЛЬЗОВАТЕЛЬ + ИСТОРИЯ
 # ============================================================
 with st.sidebar:
+    user_label = html.escape(CURRENT_USER) + (
+        " · :material/verified: Админ" if IS_ADMIN else ""
+    )
+    st.markdown(f"**:material/person: {user_label}**")
+    if st.button(
+        ":material/logout: Сменить пользователя",
+        use_container_width=True,
+    ):
+        st.session_state.pop("username", None)
+        st.session_state.pop("is_admin", None)
+        st.session_state.pop("selected_history", None)
+        if "user" in st.query_params:
+            del st.query_params["user"]
+        st.rerun()
+    st.divider()
     st.header(":material/history: История анализов")
-    history = load_history()
-    if not history:
-        st.caption("Здесь появятся ваши анализы.")
-    else:
-        st.caption(
-            f"Сохранено анализов: {len(history)}"
+    if IS_ADMIN:
+        view_mode = st.radio(
+            "Показать",
+            ["Моя история", "Общая история (все пользователи)"],
+            horizontal=True,
+            label_visibility="collapsed",
         )
-        if st.button(
-            ":material/delete_sweep: Очистить всю историю",
-            use_container_width=True,
-        ):
-            save_history([])
-            st.session_state.pop(
-                "selected_history",
-                None,
-            )
-            st.rerun()
+    else:
+        view_mode = "Моя история"
+    all_history = load_all_history()
+    if view_mode == "Моя история":
+        history_pairs = [
+            (CURRENT_USER, item)
+            for item in all_history.get(CURRENT_USER, [])
+        ]
+    else:
+        history_pairs = [
+            (owner, item)
+            for owner, items in all_history.items()
+            for item in items
+        ]
+        history_pairs.sort(
+            key=lambda pair: pair[1].get("sort_ts", ""),
+            reverse=True,
+        )
+    if not history_pairs:
+        st.caption("Здесь появятся анализы.")
+    else:
+        st.caption(f"Показано анализов: {len(history_pairs)}")
+        clear_col1, clear_col2 = st.columns(2)
+        with clear_col1:
+            if st.button(
+                ":material/delete_sweep: Очистить мою историю",
+                use_container_width=True,
+            ):
+                clear_user_history(CURRENT_USER)
+                st.session_state.pop("selected_history", None)
+                st.rerun()
+        if IS_ADMIN:
+            with clear_col2:
+                if st.button(
+                    ":material/delete_forever: Очистить всю историю",
+                    use_container_width=True,
+                ):
+                    clear_all_history()
+                    st.session_state.pop("selected_history", None)
+                    st.rerun()
         st.divider()
-        for item in history:
+        for owner, item in history_pairs:
             saved_result = item.get(
                 "result",
                 {},
@@ -1400,6 +2270,8 @@ with st.sidebar:
                 f"</div>",
                 unsafe_allow_html=True,
             )
+            if view_mode != "Моя история":
+                st.caption(f":material/person: {html.escape(str(owner))}")
             st.caption(
                 f"{category} · {score}/100"
             )
@@ -1412,7 +2284,7 @@ with st.sidebar:
             with col_open:
                 if st.button(
                     "Открыть",
-                    key=f"open_{item['id']}",
+                    key=f"open_{owner}_{item['id']}",
                     use_container_width=True,
                 ):
                     st.session_state.selected_history = item
@@ -1420,11 +2292,11 @@ with st.sidebar:
             with col_delete:
                 if st.button(
                     ":material/delete: ",
-                    key=f"delete_{item['id']}",
+                    key=f"delete_{owner}_{item['id']}",
                     use_container_width=True,
                 ):
                     delete_from_history(
-                        item["id"]
+                        owner, item["id"]
                     )
                     if (
                         st.session_state.get(
@@ -1649,6 +2521,7 @@ with info_col:
 # ANALYSIS
 # ============================================================
 if analyze:
+    analysis_placeholder = st.empty()
     # --------------------------------------------------------
     # PHOTO
     # --------------------------------------------------------
@@ -1658,7 +2531,7 @@ if analyze:
                 ":material/warning: Сначала загрузите фотографию состава."
             )
             st.stop()
-        st.markdown(
+        analysis_placeholder.markdown(
             """
             <div class="ev-analysis">
                 <div class="ev-analysis-label">VISION AI · ANALYZING</div>
@@ -1677,10 +2550,12 @@ if analyze:
                     uploaded_mime_type,
                 )
             except Exception as error:
+                analysis_placeholder.empty()
                 st.error(
                     f"Ошибка анализа фотографии: {error}"
                 )
                 st.stop()
+        analysis_placeholder.empty()
         composition_text = str(
             result.get(
                 "composition_text",
@@ -1701,7 +2576,7 @@ if analyze:
                 ":material/warning: Введите состав продукта."
             )
             st.stop()
-        st.markdown(
+        analysis_placeholder.markdown(
             """
             <div class="ev-analysis">
                 <div class="ev-analysis-label">E-VISION · ANALYZING</div>
@@ -1719,15 +2594,18 @@ if analyze:
                     product_text
                 )
             except Exception as error:
+                analysis_placeholder.empty()
                 st.error(
                     f"Ошибка анализа Gemini: {error}"
                 )
                 st.stop()
+        analysis_placeholder.empty()
         history_text = product_text
     # --------------------------------------------------------
     # SAVE + DISPLAY
     # --------------------------------------------------------
     add_to_history(
+        CURRENT_USER,
         history_text,
         result,
     )
@@ -1735,3 +2613,4 @@ if analyze:
         result,
         history_text,
     )
+ 
