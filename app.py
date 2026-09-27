@@ -2383,39 +2383,20 @@ with input_col:
                 height=220,
             )
         else:
-            camera_tab, gallery_tab = st.tabs([
-                ":material/photo_camera: Сделать фото",
-                ":material/upload: Галерея или файлы",
-            ])
-            with camera_tab:
-                camera_photo = st.camera_input(
-                    "Сфотографируйте состав",
-                    help=(
-                        "Наведите камеру на этикетку: текст должен быть "
-                        "чётким и хорошо освещённым."
-                    ),
-                )
-            with gallery_tab:
-                gallery_photo = st.file_uploader(
-                    "Выберите фотографию состава",
-                    type=[
-                        "jpg",
-                        "jpeg",
-                        "png",
-                        "webp",
-                    ],
-                    help=(
-                        "Выберите заранее сделанную фотографию из галереи "
-                        "или файлов."
-                    ),
-                )
-            uploaded = camera_photo or gallery_photo
+            uploaded = st.file_uploader(
+                "Сфотографируйте или выберите фотографию состава",
+                type=[
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "webp",
+                ],
+                help=(
+                    "На телефоне системное меню позволит снять новое фото "
+                    "или выбрать изображение из галереи."
+                ),
+            )
             if uploaded:
-                source_caption = (
-                    "Сделанная фотография"
-                    if camera_photo
-                    else "Загруженная фотография"
-                )
                 image_bytes = uploaded.getvalue()
                 image_hash = hashlib.md5(
                     image_bytes
@@ -2428,7 +2409,7 @@ with input_col:
                     ).convert("RGB")
                     st.image(
                         image,
-                        caption=source_caption,
+                        caption="Выбранная фотография",
                         use_container_width=True,
                     )
                     uploaded_image_bytes = image_bytes
