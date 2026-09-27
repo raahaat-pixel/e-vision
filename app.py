@@ -2116,6 +2116,39 @@ if "username" not in st.session_state:
     st.stop()
 CURRENT_USER = st.session_state.username
 IS_ADMIN = st.session_state.get("is_admin", False)
+IS_EVISION_APK = st.query_params.get("platform") == "apk"
+
+if IS_EVISION_APK:
+    st.markdown(
+        """
+        <style>
+        @media (max-width: 760px) {
+            .stApp::before,
+            .ev-analysis::before {
+                display: none !important;
+            }
+
+            .st-key-ev-input-panel,
+            .st-key-ev-process-panel,
+            .ev-hero,
+            .result-hero,
+            .nutrition-card,
+            [data-testid="stFileUploaderDropzone"],
+            .stButton > button {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            .ev-progress > div,
+            .result-hero,
+            .result-meter > span {
+                animation: none !important;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 # ============================================================
 # HEADER
 # ============================================================
@@ -2174,6 +2207,26 @@ E-vision распознает компоненты, объяснит их наз
 # ============================================================
 # SIDEBAR — ПОЛЬЗОВАТЕЛЬ + ИСТОРИЯ
 # ============================================================
+def get_history_pairs(view_mode):
+    all_history = load_all_history()
+    if view_mode == "Моя история":
+        return [
+            (CURRENT_USER, item)
+            for item in all_history.get(CURRENT_USER, [])
+        ]
+
+    history_pairs = [
+        (owner, item)
+        for owner, items in all_history.items()
+        for item in items
+    ]
+    history_pairs.sort(
+        key=lambda pair: pair[1].get("sort_ts", ""),
+        reverse=True,
+    )
+    return history_pairs
+
+
 with st.sidebar:
     user_label = html.escape(CURRENT_USER) + (
         " · :material/verified: Админ" if IS_ADMIN else ""
@@ -2190,130 +2243,181 @@ with st.sidebar:
             del st.query_params["user"]
         st.rerun()
     st.divider()
-    st.header(":material/history: История анализов")
-    if IS_ADMIN:
-        view_mode = st.radio(
-            "Показать",
-            ["Моя история", "Общая история (все пользователи)"],
-            horizontal=True,
-            label_visibility="collapsed",
-        )
+    if IS_EVISION_APK:
+        st.caption("История доступна на главном экране приложения.")
     else:
-        view_mode = "Моя история"
-    all_history = load_all_history()
-    if view_mode == "Моя история":
-        history_pairs = [
-            (CURRENT_USER, item)
-            for item in all_history.get(CURRENT_USER, [])
-        ]
-    else:
-        history_pairs = [
-            (owner, item)
-            for owner, items in all_history.items()
-            for item in items
-        ]
-        history_pairs.sort(
-            key=lambda pair: pair[1].get("sort_ts", ""),
-            reverse=True,
-        )
-    if not history_pairs:
-        st.caption("Здесь появятся анализы.")
-    else:
-        st.caption(f"Показано анализов: {len(history_pairs)}")
-        clear_col1, clear_col2 = st.columns(2)
-        with clear_col1:
-            if st.button(
-                ":material/delete_sweep: Очистить мою историю",
-                use_container_width=True,
-            ):
-                clear_user_history(CURRENT_USER)
-                st.session_state.pop("selected_history", None)
-                st.rerun()
+        st.header(":material/history: История анализов")
         if IS_ADMIN:
-            with clear_col2:
+            view_mode = st.radio(
+                "Показать",
+                ["Моя история", "Общая история (все пользователи)"],
+                horizontal=True,
+                label_visibility="collapsed",
+            )
+        else:
+            view_mode = "Моя история"
+        history_pairs = get_history_pairs(view_mode)
+        if not history_pairs:
+            st.caption("Здесь появятся анализы.")
+        else:
+            st.caption(f"Показано анализов: {len(history_pairs)}")
+            clear_col1, clear_col2 = st.columns(2)
+            with clear_col1:
                 if st.button(
+                    ":material/delete_sweep: Очистить мою историю",
+                    use_container_width=True,
+                ):
+                    clear_user_history(CURRENT_USER)
+                    st.session_state.pop("selected_history", None)
+                    st.rerun()
+            if IS_ADMIN:
+                with clear_col2:
+                    if st.button(
+                        ":material/delete_forever: Очистить всю историю",
+                        use_container_width=True,
+                    ):
+                        clear_all_history()
+                        st.session_state.pop("selected_history", None)
+                        st.rerun()
+            st.divider()
+            for owner, item in history_pairs:
+                saved_result = item.get("result", {})
+                score = safe_score(saved_result.get("score"))
+                verdict = str(saved_result.get("verdict", "orange")).lower()
+                if verdict not in {"green", "orange", "red"}:
+                    verdict = "orange"
+                product_type = saved_result.get(
+                    "product_type", "Неизвестный продукт"
+                )
+                category = saved_result.get("category", "Другое")
+                st.markdown(
+                    f'<div class="history-analysis-title">'
+                    f'<span class="history-status-dot {verdict}"></span>'
+                    f'<span>{html.escape(str(product_type))}</span>'
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+                if view_mode != "Моя история":
+                    st.caption(f":material/person: {html.escape(str(owner))}")
+                st.caption(f"{category} · {score}/100")
+                st.caption(item.get("date", ""))
+                col_open, col_delete = st.columns([3, 1])
+                with col_open:
+                    if st.button(
+                        "Открыть",
+                        key=f"open_{owner}_{item['id']}",
+                        use_container_width=True,
+                    ):
+                        st.session_state.selected_history = item
+                        st.rerun()
+                with col_delete:
+                    if st.button(
+                        ":material/delete: ",
+                        key=f"delete_{owner}_{item['id']}",
+                        use_container_width=True,
+                    ):
+                        delete_from_history(owner, item["id"])
+                        if (
+                            st.session_state.get(
+                                "selected_history", {}
+                            ).get("id")
+                            == item["id"]
+                        ):
+                            st.session_state.pop("selected_history", None)
+                        st.rerun()
+                st.divider()
+# ============================================================
+# SELECTED HISTORY ANALYSIS
+# ============================================================
+if IS_EVISION_APK:
+    with st.container(border=True, key="ev-apk-history"):
+        with st.expander(
+            ":material/history: История анализов",
+            expanded=False,
+        ):
+            if IS_ADMIN:
+                apk_view_mode = st.radio(
+                    "Показать",
+                    ["Моя история", "Общая история (все пользователи)"],
+                    horizontal=True,
+                    label_visibility="collapsed",
+                    key="apk_history_mode",
+                )
+            else:
+                apk_view_mode = "Моя история"
+
+            history_pairs = get_history_pairs(apk_view_mode)
+            if not history_pairs:
+                st.caption("Здесь появятся ваши анализы.")
+            else:
+                displayed_history = history_pairs[:10]
+                st.caption(
+                    f"Последние анализы: {len(displayed_history)} из "
+                    f"{len(history_pairs)}"
+                )
+                if st.button(
+                    ":material/delete_sweep: Очистить мою историю",
+                    key="apk_clear_my_history",
+                    use_container_width=True,
+                ):
+                    clear_user_history(CURRENT_USER)
+                    st.session_state.pop("selected_history", None)
+                    st.rerun()
+
+                if IS_ADMIN and st.button(
                     ":material/delete_forever: Очистить всю историю",
+                    key="apk_clear_all_history",
                     use_container_width=True,
                 ):
                     clear_all_history()
                     st.session_state.pop("selected_history", None)
                     st.rerun()
-        st.divider()
-        for owner, item in history_pairs:
-            saved_result = item.get(
-                "result",
-                {},
-            )
-            score = safe_score(
-                saved_result.get("score")
-            )
-            verdict = str(
-                saved_result.get(
-                    "verdict",
-                    "orange",
-                )
-            ).lower()
-            if verdict not in {"green", "orange", "red"}:
-                verdict = "orange"
-            product_type = saved_result.get(
-                "product_type",
-                "Неизвестный продукт",
-            )
-            category = saved_result.get(
-                "category",
-                "Другое",
-            )
-            st.markdown(
-                f'<div class="history-analysis-title">'
-                f'<span class="history-status-dot {verdict}"></span>'
-                f'<span>{html.escape(str(product_type))}</span>'
-                f"</div>",
-                unsafe_allow_html=True,
-            )
-            if view_mode != "Моя история":
-                st.caption(f":material/person: {html.escape(str(owner))}")
-            st.caption(
-                f"{category} · {score}/100"
-            )
-            st.caption(
-                item.get("date", "")
-            )
-            col_open, col_delete = st.columns(
-                [3, 1]
-            )
-            with col_open:
-                if st.button(
-                    "Открыть",
-                    key=f"open_{owner}_{item['id']}",
-                    use_container_width=True,
-                ):
-                    st.session_state.selected_history = item
-                    st.rerun()
-            with col_delete:
-                if st.button(
-                    ":material/delete: ",
-                    key=f"delete_{owner}_{item['id']}",
-                    use_container_width=True,
-                ):
-                    delete_from_history(
-                        owner, item["id"]
+
+                for owner, item in displayed_history:
+                    saved_result = item.get("result", {})
+                    score = safe_score(saved_result.get("score"))
+                    product_type = saved_result.get(
+                        "product_type", "Неизвестный продукт"
                     )
-                    if (
-                        st.session_state.get(
-                            "selected_history",
-                            {},
-                        ).get("id")
-                        == item["id"]
-                    ):
-                        st.session_state.pop(
-                            "selected_history",
-                            None,
-                        )
-                    st.rerun()
-            st.divider()
-# ============================================================
-# SELECTED HISTORY ANALYSIS
-# ============================================================
+                    category = saved_result.get("category", "Другое")
+                    item_label = (
+                        f"{product_type} · {score}/100 · "
+                        f"{item.get('date', '')}"
+                    )
+                    with st.expander(item_label, expanded=False):
+                        if apk_view_mode != "Моя история":
+                            st.caption(
+                                f":material/person: "
+                                f"{html.escape(str(owner))}"
+                            )
+                        st.caption(category)
+                        open_col, delete_col = st.columns([4, 1])
+                        with open_col:
+                            if st.button(
+                                ":material/visibility: Открыть анализ",
+                                key=f"apk_open_{owner}_{item['id']}",
+                                use_container_width=True,
+                            ):
+                                st.session_state.selected_history = item
+                                st.rerun()
+                        with delete_col:
+                            if st.button(
+                                ":material/delete:",
+                                key=f"apk_delete_{owner}_{item['id']}",
+                                use_container_width=True,
+                            ):
+                                delete_from_history(owner, item["id"])
+                                if (
+                                    st.session_state.get(
+                                        "selected_history", {}
+                                    ).get("id")
+                                    == item["id"]
+                                ):
+                                    st.session_state.pop(
+                                        "selected_history", None
+                                    )
+                                st.rerun()
+
 selected_history = st.session_state.get(
     "selected_history"
 )
