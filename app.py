@@ -2153,7 +2153,7 @@ st.markdown(
 <div class="ev-kicker">E-VISION · AI PRODUCT ANALYSIS</div>
 <div class="ev-hero-title">Понимайте состав продукта с первого взгляда.</div>
 <div class="ev-hero-text">
-Загрузите фотографию этикетки или вставьте состав вручную.
+Загрузите фотографию этикетки или вставьте состав.
 E-vision распознает компоненты, объяснит их назначение и
 сформирует понятный индекс состава.
 </div>
@@ -2356,15 +2356,15 @@ with input_col:
         )
         st.markdown(
             '<div class="input-intro">Загрузите фото этикетки или вставьте '
-            'состав вручную — E-vision использует AI, чтобы объяснить '
+            'состав — E-vision использует AI, чтобы объяснить '
             'ингредиенты и оценить состав.</div>',
             unsafe_allow_html=True,
         )
         method = st.radio(
             "Способ ввода",
             [
-                ":material/edit_note: Ввести вручную",
                 ":material/photo_camera: Загрузить фото",
+                ":material/edit_note: Ввести вручную",
             ],
             horizontal=True,
             label_visibility="collapsed",
@@ -2481,7 +2481,7 @@ with info_col:
                 (
                     "01",
                     "Получаем состав",
-                    "Вы вводите состав продукта вручную.",
+                    "Вы вводите состав продукта.",
                 ),
                 (
                     "02",
