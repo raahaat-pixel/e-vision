@@ -2554,10 +2554,11 @@ if analyze:
                     uploaded_image_bytes,
                     uploaded_mime_type,
                 )
-            except Exception as error:
+            except Exception:
                 analysis_placeholder.empty()
                 st.error(
-                    f"Ошибка анализа фотографии: {error}"
+                    ":material/error: ИИ временно недоступен или перегружен. "
+                    "Попробуйте нажать «Анализировать состав» ещё раз."
                 )
                 st.stop()
         analysis_placeholder.empty()
@@ -2598,10 +2599,11 @@ if analyze:
                 result = analyze_text_product(
                     product_text
                 )
-            except Exception as error:
+            except Exception:
                 analysis_placeholder.empty()
                 st.error(
-                    f"Ошибка анализа Gemini: {error}"
+                    ":material/error: ИИ временно недоступен или перегружен. "
+                    "Попробуйте нажать «Анализировать состав» ещё раз."
                 )
                 st.stop()
         analysis_placeholder.empty()
