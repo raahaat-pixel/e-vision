@@ -2436,88 +2436,92 @@ with input_col:
 # ============================================================
 with info_col:
     with st.container(border=True, key="ev-process-panel"):
-        st.markdown(
-            '<div class="section-kicker">02 · PROCESS</div>',
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            """
-            <div class="glass-section-title">
-                <span class="glass-section-number">02</span>
-                <span class="glass-section-name">Как работает E-vision</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if method == ":material/photo_camera: Фото этикетки":
-            steps = [
-                (
-                    "01",
-                    "Получаем фотографию",
-                    "Вы загружаете фото этикетки продукта.",
-                ),
-                (
-                    "02",
-                    "Читаем изображение",
-                    "Gemini Vision непосредственно читает текст на фотографии.",
-                ),
-                (
-                    "03",
-                    "Проверяем читаемость",
-                    "ИИ отмечает нечитаемые или отсутствующие участки.",
-                ),
-                (
-                    "04",
-                    "Определяем продукт",
-                    "Определяются категория и конкретный тип.",
-                ),
-                (
-                    "05",
-                    "Анализируем состав",
-                    "Компоненты оцениваются с учётом назначения продукта.",
-                ),
-            ]
-        else:
-            steps = [
-                (
-                    "01",
-                    "Получаем состав",
-                    "Вы вводите состав продукта.",
-                ),
-                (
-                    "02",
-                    "Определяем продукт",
-                    "Определяются категория и конкретный тип.",
-                ),
-                (
-                    "03",
-                    "Анализируем состав",
-                    "Компоненты оцениваются с учётом назначения продукта.",
-                ),
-                (
-                    "04",
-                    "Ищем особенности",
-                    "ИИ выделяет потенциально важные компоненты.",
-                ),
-                (
-                    "05",
-                    "Формируем вывод",
-                    "Вы получаете индекс, объяснение и рекомендации.",
-                ),
-            ]
-        for number, title, description in steps:
+        with st.expander(
+            ":material/account_tree: 02 · Как работает E-vision",
+            expanded=False,
+        ):
             st.markdown(
-                f"""
-                <div class="process-step">
-                    <div class="process-number">{number}</div>
-                    <div>
-                        <div class="process-title">{title}</div>
-                        <div class="process-description">{description}</div>
-                    </div>
+                '<div class="section-kicker">02 · PROCESS</div>',
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                """
+                <div class="glass-section-title">
+                    <span class="glass-section-number">02</span>
+                    <span class="glass-section-name">Этапы работы E-vision</span>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
+            if method == ":material/photo_camera: Фото этикетки":
+                steps = [
+                    (
+                        "01",
+                        "Получаем фотографию",
+                        "Вы загружаете фото этикетки продукта.",
+                    ),
+                    (
+                        "02",
+                        "Читаем изображение",
+                        "Gemini Vision непосредственно читает текст на фотографии.",
+                    ),
+                    (
+                        "03",
+                        "Проверяем читаемость",
+                        "ИИ отмечает нечитаемые или отсутствующие участки.",
+                    ),
+                    (
+                        "04",
+                        "Определяем продукт",
+                        "Определяются категория и конкретный тип.",
+                    ),
+                    (
+                        "05",
+                        "Анализируем состав",
+                        "Компоненты оцениваются с учётом назначения продукта.",
+                    ),
+                ]
+            else:
+                steps = [
+                    (
+                        "01",
+                        "Получаем состав",
+                        "Вы вводите состав продукта.",
+                    ),
+                    (
+                        "02",
+                        "Определяем продукт",
+                        "Определяются категория и конкретный тип.",
+                    ),
+                    (
+                        "03",
+                        "Анализируем состав",
+                        "Компоненты оцениваются с учётом назначения продукта.",
+                    ),
+                    (
+                        "04",
+                        "Ищем особенности",
+                        "ИИ выделяет потенциально важные компоненты.",
+                    ),
+                    (
+                        "05",
+                        "Формируем вывод",
+                        "Вы получаете индекс, объяснение и рекомендации.",
+                    ),
+                ]
+            for number, title, description in steps:
+                st.markdown(
+                    f"""
+                    <div class="process-step">
+                        <div class="process-number">{number}</div>
+                        <div>
+                            <div class="process-title">{title}</div>
+                            <div class="process-description">{description}</div>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 # ============================================================
 # ANALYSIS
 # ============================================================
