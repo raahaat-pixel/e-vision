@@ -8,6 +8,14 @@ import streamlit as st
 from PIL import Image, ImageOps
 from google import genai
 from google.genai import types
+import streamlit.components.v1 as components
+from pathlib import Path
+from evision_extras import load_profile, save_profile, profile_context, inspect_photo
+from profile_ui import render_settings
+
+photo_uploader = components.declare_component(
+    "evision_photo_uploader", path=str(Path(__file__).parent / "photo_uploader")
+)
 # ============================================================
 # CONFIG
 # ============================================================
@@ -1185,6 +1193,152 @@ div[data-baseweb="select"] > div,
     box-shadow: 0 10px 30px rgba(22,119,255,.08);
 }
 
+/* Consistent glass surfaces for settings, forms and expanders. */
+.st-key-ev-settings-panel,
+.st-key-ev-login-panel,
+.st-key-ev-apk-history,
+[data-testid="stForm"],
+[data-testid="stExpander"] {
+    border: 1px solid rgba(255,255,255,.92) !important;
+    border-radius: 22px !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.80), rgba(225,242,255,.52)) !important;
+    box-shadow: 0 12px 30px rgba(30,64,175,.09), inset 0 1px 0 rgba(255,255,255,.95) !important;
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+}
+[data-testid="stAlert"] {
+    border-radius: 16px !important;
+    border: 1px solid rgba(255,255,255,.85) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 5px 18px rgba(30,64,175,.06) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+[data-testid="stExpander"] details,
+[data-testid="stExpander"] summary {
+    border: 0 !important;
+    border-radius: 20px !important;
+    background: transparent !important;
+}
+[data-testid="stExpander"] summary:hover { background: rgba(255,255,255,.30) !important; }
+/* Current Streamlit versions use these root elements instead of BaseWeb. */
+[data-testid="stTextInputRootElement"],
+[data-testid="stTextAreaRootElement"],
+[data-testid="stNumberInputContainer"],
+[data-testid="stSelectbox"] [role="group"] {
+    border: 1px solid rgba(255,255,255,.94) !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.78), rgba(234,245,255,.64)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 4px 14px rgba(30,64,175,.06) !important;
+}
+[data-testid="stNumberInput"] input { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+[data-testid="stTextInputRootElement"]:focus-within,
+[data-testid="stTextAreaRootElement"]:focus-within,
+[data-testid="stNumberInputContainer"]:focus-within,
+[data-testid="stSelectbox"] [role="group"]:focus-within {
+    outline: 2px solid rgba(22,119,255,.75) !important;
+    outline-offset: 1px;
+}
+[data-testid="stFormSubmitButton"] button {
+    border-radius: 16px !important;
+    border: 1px solid rgba(255,255,255,.75) !important;
+    box-shadow: 0 10px 28px rgba(30,64,175,.12), inset 0 1px 0 rgba(255,255,255,.85) !important;
+}
+[data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"] > div,
+[data-testid="stNumberInput"] input {
+    border: 1px solid rgba(255,255,255,.88) !important;
+    background: rgba(255,255,255,.62) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 3px 14px rgba(30,64,175,.06) !important;
+}
+[data-baseweb="input"]:focus-within, [data-baseweb="textarea"]:focus-within,
+[data-baseweb="select"]:focus-within {
+    outline: 2px solid rgba(22,119,255,.75) !important;
+    outline-offset: 1px;
+}
+[data-testid="stTabs"] [role="tablist"] {
+    border-radius: 15px;
+    background: rgba(255,255,255,.42);
+    padding: 4px;
+}
+[data-testid="stTabs"] [role="tab"] { border-radius: 12px; }
+[data-testid="stTabs"] [role="tab"][aria-selected="true"] {
+    background: rgba(255,255,255,.7);
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* Mobile navigation. Desktop layout remains unchanged. */
+.st-key-ev-mobile-nav, .st-key-ev-mobile-history { display: none !important; }
+@media (max-width: 767px) {
+    .block-container { padding-bottom: calc(125px + env(safe-area-inset-bottom, 0px)) !important; }
+    [data-testid="stMain"] { scroll-padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)); }
+    .block-container button, .block-container input, .block-container textarea { scroll-margin-bottom: 120px; }
+    .st-key-ev-mobile-nav {
+        display: block !important; position: fixed !important;
+        left: 14px !important; right: 14px !important;
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+        z-index: 999999 !important; width: auto !important;
+        padding: 7px 6px !important;
+        background: linear-gradient(150deg, rgba(255,255,255,.58) 0%, rgba(228,242,255,.48) 52%, rgba(255,255,255,.56) 100%) !important;
+        border: 1px solid rgba(255,255,255,.74) !important; border-radius: 27px !important;
+        box-shadow: 0 10px 32px rgba(26,65,130,.18), 0 2px 8px rgba(26,65,130,.08), inset 0 1px 1px rgba(255,255,255,.92), inset 0 -1px 0 rgba(173,201,232,.24) !important;
+        backdrop-filter: blur(28px) saturate(185%); -webkit-backdrop-filter: blur(28px) saturate(185%);
+    }
+    .st-key-ev-mobile-nav [data-testid="stHorizontalBlock"] {
+        display: flex !important; flex-wrap: nowrap !important; gap: 2px !important; align-items: stretch !important;
+    }
+    .st-key-ev-mobile-nav [data-testid="stColumn"] {
+        flex: 1 1 0 !important; min-width: 0 !important; width: 0 !important;
+    }
+    .st-key-ev-mobile-nav .stButton > button {
+        min-height: 58px !important; padding: 5px 2px !important;
+        border-radius: 20px !important; border-color: transparent !important;
+        box-shadow: none !important; color: #164e91 !important;
+        background: transparent !important;
+    }
+    .st-key-ev-mobile-nav .stButton > button:hover {
+        background: rgba(255,255,255,.35) !important;
+    }
+    .st-key-ev-mobile-nav .stButton > button:focus-visible {
+        outline: 2px solid #1559a6 !important; outline-offset: -2px !important;
+        background: rgba(255,255,255,.58) !important;
+    }
+    .st-key-ev-mobile-nav .stButton > button p { display: flex !important; flex-direction: column; align-items: center; gap: 2px; font-size: 12px !important; line-height: 1.12 !important; font-weight: 650; }
+    .st-key-ev-mobile-nav .stButton > button p span[role="img"] { display: block !important; font-size: 20px !important; line-height: 1 !important; }
+    .st-key-ev-mobile-nav .stButton > button[kind="primary"] {
+        background: linear-gradient(155deg, rgba(255,255,255,.74), rgba(237,247,255,.50)) !important;
+        border: 1px solid rgba(255,255,255,.66) !important;
+        color: #0751a5 !important;
+        box-shadow: inset 0 1px 1px rgba(255,255,255,.95), 0 3px 12px rgba(30,64,175,.12) !important;
+    }
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+        .st-key-ev-mobile-nav { background: rgba(241,248,255,.97) !important; }
+    }
+    @media (prefers-reduced-transparency: reduce) {
+        .st-key-ev-mobile-nav { background: rgba(241,248,255,.98) !important; backdrop-filter: none; -webkit-backdrop-filter: none; }
+    }
+    body:has(.ev-mobile-view-history) .st-key-ev-mobile-history { display: block !important; }
+    body:has(.ev-mobile-view-history) .st-key-ev-home-header,
+    body:has(.ev-mobile-view-settings) .st-key-ev-home-header,
+    body:has(.ev-mobile-view-history) .st-key-ev-input-panel,
+    body:has(.ev-mobile-view-settings) .st-key-ev-input-panel,
+    body:has(.ev-mobile-view-history) .st-key-ev-process-panel,
+    body:has(.ev-mobile-view-settings) .st-key-ev-process-panel,
+    body:has(.ev-mobile-view-history) .st-key-ev-settings-panel,
+    body:has(.ev-mobile-view-history) .st-key-ev-apk-history,
+    body:has(.ev-mobile-view-settings) .st-key-ev-apk-history,
+    body:has(.ev-mobile-view-settings) .st-key-ev-selected-history,
+    body:has(.ev-mobile-view-history) .st-key-ev-current-result,
+    body:has(.ev-mobile-view-settings) .st-key-ev-current-result { display: none !important; }
+    body:has(.ev-mobile-history-detail) .st-key-ev-mobile-history { display: none !important; }
+}
+.st-key-ev-mobile-history {
+    border: 1px solid rgba(255,255,255,.92) !important;
+    border-radius: 22px !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.8), rgba(225,242,255,.52)) !important;
+    box-shadow: 0 12px 30px rgba(30,64,175,.09), inset 0 1px 0 rgba(255,255,255,.95) !important;
+}
+
 /* ============================================================
    ANIMATIONS
    ============================================================ */
@@ -1679,9 +1833,11 @@ def clear_all_history():
 # ============================================================
 # TEXT ANALYSIS
 # ============================================================
-def analyze_text_product(text):
+def analyze_text_product(text, profile=None):
+    profile_information = profile_context(profile or {})
     prompt = f"""
 {ANALYSIS_RULES}
+{profile_information}
 ИСТОЧНИК ДАННЫХ: ТЕКСТ.
 Проанализируй следующий предоставленный пользователем состав:
 --- НАЧАЛО СОСТАВА ---
@@ -1697,9 +1853,11 @@ def analyze_text_product(text):
 # ============================================================
 # PHOTO ANALYSIS — GEMINI VISION
 # ============================================================
-def analyze_photo_product(image_bytes, mime_type):
+def analyze_photo_product(image_bytes, mime_type, profile=None):
+    profile_information = profile_context(profile or {})
     prompt = f"""
 {ANALYSIS_RULES}
+{profile_information}
 ИСТОЧНИК ДАННЫХ: ФОТОГРАФИЯ ЭТИКЕТКИ.
 Сначала внимательно прочитай текст на фотографии.
 Затем используй только действительно читаемую информацию
@@ -1735,6 +1893,7 @@ def render_analysis_result(
     source_text,
     saved_date=None,
     show_close=False,
+    close_state_key="selected_history",
 ):
     score = safe_score(result.get("score"))
     verdict = str(
@@ -1759,6 +1918,13 @@ def render_analysis_result(
     )
     st.divider()
     st.subheader(":material/analytics: Результат анализа")
+    if show_close and st.button(
+        ":material/close: Закрыть анализ", key=f"close_result_{close_state_key}",
+        use_container_width=True,
+        help="Закрыть результат и вернуться назад. Запись остаётся в истории."
+    ):
+        st.session_state.pop(close_state_key, None)
+        st.rerun()
     if saved_date:
         st.caption(f"Дата анализа: {saved_date}")
     verdict_text = str(
@@ -2045,13 +2211,6 @@ def render_analysis_result(
         "Он не гарантирует абсолютную безопасность и не является "
         "медицинской рекомендацией."
     )
-    if show_close:
-        if st.button(":material/close: Закрыть сохранённый анализ"):
-            st.session_state.pop(
-                "selected_history",
-                None,
-            )
-            st.rerun()
 # ============================================================
 # ЛОГИН (имя для пользователя; отдельный пароль для разработчика)
 # ============================================================
@@ -2076,7 +2235,7 @@ if "username" not in st.session_state:
     )
     _, login_col, _ = st.columns([1, 2, 1])
     with login_col:
-        with st.container(border=True):
+        with st.container(border=True, key="ev-login-panel"):
             nickname_input = st.text_input(
                 "Имя / никнейм",
                 placeholder="Например: Aigerim",
@@ -2117,6 +2276,26 @@ if "username" not in st.session_state:
 CURRENT_USER = st.session_state.username
 IS_ADMIN = st.session_state.get("is_admin", False)
 IS_EVISION_APK = st.query_params.get("platform") == "apk"
+try:
+    USER_PROFILE = load_profile(CURRENT_USER)
+except (OSError, ValueError):
+    USER_PROFILE = {}
+    st.error("Не удалось прочитать настройки профиля. Проверьте файл profiles.json и права доступа.")
+SIMPLE_MODE = bool(USER_PROFILE.get("large_mode", False))
+if SIMPLE_MODE:
+    st.markdown("""<style>
+    .stApp { font-size: 20px; }
+    .stApp p, .stApp label, .stApp input, .stApp textarea, .stApp button,
+    .stApp [data-testid="stCaptionContainer"], .input-intro, .result-summary,
+    .ingredient-explanation, .insight-list { font-size: 20px !important; line-height: 1.55 !important; }
+    .stButton > button { min-height: 54px; font-weight: 700; }
+    .stApp a { text-decoration: underline; }
+    .ev-hero, .st-key-ev-process-panel { display: none; }
+    .result-title { font-size: 30px !important; }
+    .st-key-ev-mobile-nav .stButton > button p { font-size: 13px !important; }
+    .st-key-ev-mobile-nav .stButton > button { min-height: 64px !important; }
+    .result-hero, .insight-card, .allergy-card { color: #101c2b; }
+    </style>""", unsafe_allow_html=True)
 
 if IS_EVISION_APK:
     st.markdown(
@@ -2152,58 +2331,64 @@ if IS_EVISION_APK:
 # ============================================================
 # HEADER
 # ============================================================
-def get_base64_image(image_path):
-    try:
-        with open(image_path, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode()
-    except FileNotFoundError:
-        return ""
-logo_base64 = get_base64_image("logo.png")
-if logo_base64:
-    logo_html = f'<img src="data:image/png;base64,{logo_base64}" style="height: 64px; width: 64px; margin-right: 12px; vertical-align: middle; border-radius: 14px; box-shadow: 0 8px 24px rgba(30,64,175,.12);">'
-else:
-    logo_html = '<span class="brand-mark">E</span>'
-st.markdown(
-    f"""
-    <div class="main-title" style="display: flex; align-items: center; margin-bottom: 15px;">
-        {logo_html}
-        <div>
-            Анализатор состава продуктов <span class="brand-name">E-vision</span>
+MOBILE_PAGE = st.session_state.get("ev_mobile_page", "home")
+if MOBILE_PAGE not in {"home", "history", "settings"}:
+    MOBILE_PAGE = "home"
+mobile_detail = " ev-mobile-history-detail" if MOBILE_PAGE == "history" and st.session_state.get("selected_history") else ""
+st.markdown(f'<span class="ev-mobile-view-{MOBILE_PAGE}{mobile_detail}"></span>', unsafe_allow_html=True)
+with st.container(key="ev-home-header"):
+    def get_base64_image(image_path):
+        try:
+            with open(image_path, "rb") as img_file:
+                return base64.b64encode(img_file.read()).decode()
+        except FileNotFoundError:
+            return ""
+    logo_base64 = get_base64_image("logo.png")
+    if logo_base64:
+        logo_html = f'<img src="data:image/png;base64,{logo_base64}" style="height: 64px; width: 64px; margin-right: 12px; vertical-align: middle; border-radius: 14px; box-shadow: 0 8px 24px rgba(30,64,175,.12);">'
+    else:
+        logo_html = '<span class="brand-mark">E</span>'
+    st.markdown(
+        f"""
+        <div class="main-title" style="display: flex; align-items: center; margin-bottom: 15px;">
+            {logo_html}
+            <div>
+                Анализатор состава продуктов <span class="brand-name">E-vision</span>
+            </div>
         </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div class="subtitle">'
+        "Проверьте состав продукта и получите понятный "
+        "анализ с рекомендациями."
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        """<div class="ev-hero">
+    <div class="ev-kicker">E-VISION · AI PRODUCT ANALYSIS</div>
+    <div class="ev-hero-title">Понимайте состав продукта с первого взгляда.</div>
+    <div class="ev-hero-text">
+    Загрузите фотографию этикетки или вставьте состав.
+    E-vision распознает компоненты, объяснит их назначение и
+    сформирует понятный индекс состава.
     </div>
-    """,
-    unsafe_allow_html=True,
-)
-st.markdown(
-    '<div class="subtitle">'
-    "Проверьте состав продукта и получите понятный "
-    "анализ с рекомендациями."
-    "</div>",
-    unsafe_allow_html=True,
-)
-st.markdown(
-    """<div class="ev-hero">
-<div class="ev-kicker">E-VISION · AI PRODUCT ANALYSIS</div>
-<div class="ev-hero-title">Понимайте состав продукта с первого взгляда.</div>
-<div class="ev-hero-text">
-Загрузите фотографию этикетки или вставьте состав.
-E-vision распознает компоненты, объяснит их назначение и
-сформирует понятный индекс состава.
-</div>
-<div class="workflow">
-<span class="workflow-step"><b>01</b> Фото</span>
-<span class="workflow-arrow">→</span>
-<span class="workflow-step"><b>02</b> Vision AI</span>
-<span class="workflow-arrow">→</span>
-<span class="workflow-step"><b>03</b> Ингредиенты</span>
-<span class="workflow-arrow">→</span>
-<span class="workflow-step"><b>04</b> Анализ</span>
-<span class="workflow-arrow">→</span>
-<span class="workflow-step"><b>05</b> Результат</span>
-</div>
-</div>""",
-    unsafe_allow_html=True,
-)
+    <div class="workflow">
+    <span class="workflow-step"><b>01</b> Фото</span>
+    <span class="workflow-arrow">→</span>
+    <span class="workflow-step"><b>02</b> Vision AI</span>
+    <span class="workflow-arrow">→</span>
+    <span class="workflow-step"><b>03</b> Ингредиенты</span>
+    <span class="workflow-arrow">→</span>
+    <span class="workflow-step"><b>04</b> Анализ</span>
+    <span class="workflow-arrow">→</span>
+    <span class="workflow-step"><b>05</b> Результат</span>
+    </div>
+    </div>""",
+        unsafe_allow_html=True,
+    )
 # ============================================================
 # SIDEBAR — ПОЛЬЗОВАТЕЛЬ + ИСТОРИЯ
 # ============================================================
@@ -2228,10 +2413,20 @@ def get_history_pairs(view_mode):
 
 
 with st.sidebar:
-    user_label = html.escape(CURRENT_USER) + (
+    user_label = html.escape(USER_PROFILE.get("display_name") or CURRENT_USER) + (
         " · :material/verified: Админ" if IS_ADMIN else ""
     )
     st.markdown(f"**:material/person: {user_label}**")
+    if st.button(":material/settings: Настройки", use_container_width=True):
+        st.session_state.ev_show_settings = not st.session_state.get("ev_show_settings", False)
+    mode = st.toggle("Крупный и простой режим", value=SIMPLE_MODE, key=f"large_mode_{CURRENT_USER}", help="Увеличивает текст и кнопки, упрощает экран.")
+    if mode != SIMPLE_MODE:
+        try:
+            USER_PROFILE["large_mode"] = mode
+            save_profile(CURRENT_USER, USER_PROFILE)
+            st.rerun()
+        except (OSError, ValueError):
+            st.error("Не удалось сохранить режим отображения.")
     if st.button(
         ":material/logout: Сменить пользователя",
         use_container_width=True,
@@ -2239,6 +2434,10 @@ with st.sidebar:
         st.session_state.pop("username", None)
         st.session_state.pop("is_admin", None)
         st.session_state.pop("selected_history", None)
+        st.session_state.pop("ev_show_settings", None)
+        st.session_state.pop("ev_photo_check", None)
+        st.session_state.pop("ev_current_result", None)
+        st.session_state.pop("ev_mobile_page", None)
         if "user" in st.query_params:
             del st.query_params["user"]
         st.rerun()
@@ -2309,6 +2508,7 @@ with st.sidebar:
                         use_container_width=True,
                     ):
                         st.session_state.selected_history = item
+                        st.session_state.pop("ev_current_result", None)
                         st.rerun()
                 with col_delete:
                     if st.button(
@@ -2326,6 +2526,82 @@ with st.sidebar:
                             st.session_state.pop("selected_history", None)
                         st.rerun()
                 st.divider()
+# Fixed navigation is visible only on narrow screens.
+with st.container(key="ev-mobile-nav"):
+    nav_home, nav_history, nav_settings, nav_logout = st.columns(4, gap="small")
+    with nav_home:
+        if st.button(":material/home: Главная", key="mobile_nav_home", type="primary" if MOBILE_PAGE == "home" else "secondary", use_container_width=True):
+            st.session_state.ev_mobile_page = "home"
+            st.session_state.ev_show_settings = False
+            st.session_state.pop("selected_history", None)
+            st.session_state.pop("ev_current_result", None)
+            st.rerun()
+    with nav_history:
+        if st.button(":material/history: История", key="mobile_nav_history", type="primary" if MOBILE_PAGE == "history" else "secondary", use_container_width=True):
+            st.session_state.ev_mobile_page = "history"
+            st.session_state.ev_show_settings = False
+            st.session_state.pop("selected_history", None)
+            st.rerun()
+    with nav_settings:
+        if st.button(":material/settings: Настройки", key="mobile_nav_settings", type="primary" if MOBILE_PAGE == "settings" else "secondary", use_container_width=True):
+            st.session_state.ev_mobile_page = "settings"
+            st.session_state.ev_show_settings = True
+            st.rerun()
+    with nav_logout:
+        if st.button(":material/logout: Выйти", key="mobile_nav_logout", use_container_width=True):
+            for state_key in ("username", "is_admin", "selected_history", "ev_current_result", "ev_show_settings", "ev_photo_check", "ev_mobile_page"):
+                st.session_state.pop(state_key, None)
+            if "user" in st.query_params:
+                del st.query_params["user"]
+            st.rerun()
+
+# This view is only shown on mobile; desktop and APK history remain intact.
+if MOBILE_PAGE == "history":
+    with st.container(border=True, key="ev-mobile-history"):
+        st.subheader(":material/history: История анализов")
+        if IS_ADMIN:
+            mobile_view = st.radio("Показать", ["Моя история", "Общая история (все пользователи)"], key="mobile_history_view")
+        else:
+            mobile_view = "Моя история"
+        mobile_pairs = get_history_pairs(mobile_view)
+        if not mobile_pairs:
+            st.caption("Здесь появятся ваши анализы.")
+        else:
+            st.caption(f"Показано анализов: {len(mobile_pairs)}")
+            if st.button(":material/delete_sweep: Очистить мою историю", key="mobile_clear_my_history", use_container_width=True):
+                clear_user_history(CURRENT_USER)
+                st.session_state.pop("selected_history", None)
+                st.rerun()
+            if IS_ADMIN and st.button(":material/delete_forever: Очистить всю историю", key="mobile_clear_all_history", use_container_width=True):
+                clear_all_history()
+                st.session_state.pop("selected_history", None)
+                st.rerun()
+            for owner, item in mobile_pairs:
+                entry_result = item.get("result", {})
+                entry_title = str(entry_result.get("product_type", "Неизвестный продукт"))
+                entry_score = safe_score(entry_result.get("score"))
+                label = f"{entry_title} · {entry_score}/100 · {item.get('date', '')}"
+                with st.expander(label):
+                    if mobile_view != "Моя история":
+                        st.caption(f"Пользователь: {owner}")
+                    st.caption(str(entry_result.get("category", "Другое")))
+                    c_open, c_delete = st.columns([3, 1])
+                    with c_open:
+                        if st.button("Открыть", key=f"mobile_open_{owner}_{item['id']}", use_container_width=True):
+                            st.session_state.selected_history = item
+                            st.session_state.pop("ev_current_result", None)
+                            st.rerun()
+                    with c_delete:
+                        if st.button(":material/delete: Удалить", key=f"mobile_delete_{owner}_{item['id']}", use_container_width=True):
+                            delete_from_history(owner, item["id"])
+                            if st.session_state.get("selected_history", {}).get("id") == item["id"]:
+                                st.session_state.pop("selected_history", None)
+                            st.rerun()
+
+if st.session_state.get("ev_show_settings", False):
+    with st.container(border=True, key="ev-settings-panel"):
+        render_settings(CURRENT_USER, USER_PROFILE)
+
 # ============================================================
 # SELECTED HISTORY ANALYSIS
 # ============================================================
@@ -2399,6 +2675,7 @@ if IS_EVISION_APK:
                                 use_container_width=True,
                             ):
                                 st.session_state.selected_history = item
+                                st.session_state.pop("ev_current_result", None)
                                 st.rerun()
                         with delete_col:
                             if st.button(
@@ -2418,28 +2695,24 @@ if IS_EVISION_APK:
                                     )
                                 st.rerun()
 
-selected_history = st.session_state.get(
-    "selected_history"
-)
+selected_history = st.session_state.get("selected_history")
 if selected_history:
-    saved_result = selected_history.get(
-        "result",
-        {},
-    )
-    st.subheader(":material/history: Сохранённый анализ")
-    render_analysis_result(
-        saved_result,
-        selected_history.get("text", ""),
-        saved_date=selected_history.get("date", ""),
-        show_close=True,
-    )
+    with st.container(key="ev-selected-history"):
+        saved_result = selected_history.get("result", {})
+        st.subheader(":material/history: Сохранённый анализ")
+        render_analysis_result(
+            saved_result,
+            selected_history.get("text", ""),
+            saved_date=selected_history.get("date", ""),
+            show_close=True,
+        )
 # ============================================================
 # INPUT
 # ============================================================
-input_col, info_col = st.columns(
-    [1, 1],
-    gap="large",
-)
+if SIMPLE_MODE:
+    input_col, info_col = st.container(), st.container()
+else:
+    input_col, info_col = st.columns([1, 1], gap="large")
 # ============================================================
 # INPUT COLUMN
 # ============================================================
@@ -2487,49 +2760,42 @@ with input_col:
                 height=220,
             )
         else:
-            uploaded = st.file_uploader(
-                "Сфотографируйте или выберите фотографию состава",
-                type=[
-                    "jpg",
-                    "jpeg",
-                    "png",
-                    "webp",
-                ],
-                help=(
-                    "На телефоне системное меню позволит снять новое фото "
-                    "или выбрать изображение из галереи."
-                ),
-            )
-            if uploaded:
-                image_bytes = uploaded.getvalue()
-                image_hash = hashlib.md5(
-                    image_bytes
-                ).hexdigest()
+            image_bytes = None
+            upload_mime = None
+            photo = photo_uploader(key=f"ev_compressed_photo_{CURRENT_USER}", default=None, large=SIMPLE_MODE)
+            if isinstance(photo, dict) and isinstance(photo.get("data"), str):
                 try:
-                    image = ImageOps.exif_transpose(
-                        Image.open(
-                            BytesIO(image_bytes)
-                        )
-                    ).convert("RGB")
-                    st.image(
-                        image,
-                        caption="Выбранная фотография",
-                        use_container_width=True,
-                    )
+                    prefix, encoded = photo["data"].split(",", 1)
+                    if prefix != "data:image/jpeg;base64" or len(encoded) > 7_100_000:
+                        raise ValueError("Invalid image data")
+                    image_bytes = base64.b64decode(encoded, validate=True)
+                    if len(image_bytes) > 5 * 1024 * 1024:
+                        raise ValueError("Image too large")
+                    upload_mime = "image/jpeg"
+                except (ValueError, TypeError):
+                    st.error("Не удалось получить подготовленное фото. Попробуйте выбрать его заново.")
+            photo_check = None
+            photo_override = False
+            if image_bytes:
+                image_hash = hashlib.sha256(image_bytes).hexdigest()
+                cached = st.session_state.get("ev_photo_check", {})
+                if cached.get("hash") != image_hash:
+                    with st.spinner("Проверяем читаемость фотографии локально..."):
+                        cached = {"hash": image_hash, "result": inspect_photo(image_bytes)}
+                        st.session_state.ev_photo_check = cached
+                photo_check = cached["result"]
+                if photo_check.get("fatal"):
+                    st.error(photo_check["fatal"])
+                else:
                     uploaded_image_bytes = image_bytes
-                    uploaded_mime_type = (
-                        uploaded.type
-                        or "image/jpeg"
-                    )
-                    st.success(
-                        ":material/check_circle: Фото готово. Gemini будет читать "
-                        "состав непосредственно с изображения."
-                    )
-                    st.session_state.image_hash = image_hash
-                except Exception as error:
-                    st.error(
-                        f"Не удалось открыть изображение: {error}"
-                    )
+                    uploaded_mime_type = upload_mime
+                    st.image(image_bytes, caption="Выбранная фотография", use_container_width=True)
+                    if photo_check["warnings"]:
+                        for warning in photo_check["warnings"]:
+                            st.warning(warning)
+                        photo_override = st.checkbox("Всё равно отправить это фото на анализ", key=f"photo_override_{image_hash}")
+                    else:
+                        st.success("Предварительная проверка пройдена. Gemini прочитает состав на фото.")
         analyze = st.button(
             ":material/search: Анализировать состав",
             type="primary",
@@ -2640,6 +2906,9 @@ if analyze:
                 ":material/warning: Сначала загрузите фотографию состава."
             )
             st.stop()
+        if photo_check and photo_check.get("warnings") and not photo_override:
+            st.warning("Переснимите фото или подтвердите, что хотите продолжить.")
+            st.stop()
         analysis_placeholder.markdown(
             """
             <div class="ev-analysis">
@@ -2657,6 +2926,7 @@ if analyze:
                 result = analyze_photo_product(
                     uploaded_image_bytes,
                     uploaded_mime_type,
+                    USER_PROFILE,
                 )
             except Exception:
                 analysis_placeholder.empty()
@@ -2701,7 +2971,7 @@ if analyze:
         ):
             try:
                 result = analyze_text_product(
-                    product_text
+                    product_text, USER_PROFILE
                 )
             except Exception:
                 analysis_placeholder.empty()
@@ -2720,8 +2990,17 @@ if analyze:
         history_text,
         result,
     )
-    render_analysis_result(
-        result,
-        history_text,
-    )
- 
+    st.session_state.pop("selected_history", None)
+    st.session_state.ev_current_result = {"result": result, "text": history_text}
+    st.rerun()
+
+current_result = st.session_state.get("ev_current_result")
+if current_result:
+    with st.container(key="ev-current-result"):
+        render_analysis_result(
+            current_result.get("result", {}),
+            current_result.get("text", ""),
+            show_close=True,
+            close_state_key="ev_current_result",
+        )
+

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: transparent; }
+    body { font: 15px/1.45 system-ui, -apple-system, sans-serif; color: #183554; }
+    #content { padding: 4px 2px 8px; }
+    .picker { display: flex; gap: 12px; align-items: center; min-height: 62px; padding: 13px 16px;
+      background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(220,240,255,.62));
+      border: 1px solid rgba(255,255,255,.95); border-radius: 18px; cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 7px 22px rgba(37,99,170,.11);
+      backdrop-filter: blur(16px) saturate(145%); -webkit-backdrop-filter: blur(16px) saturate(145%); }
+    .picker:hover, .picker.dragging { box-shadow: inset 0 1px 0 white, 0 9px 25px rgba(37,99,170,.17); }
+    .picker:focus-within { outline: 3px solid #1677ff; outline-offset: 2px; }
+    .icon { display: grid; place-items: center; flex: 0 0 40px; width: 40px; height: 40px; color:#1264ca;
+      background: rgba(255,255,255,.72); border: 1px solid rgba(255,255,255,.95); border-radius: 13px; }
+    .title { display: block; color: #1455ad; font-size: 15px; font-weight: 700; }
+    .hint { display: block; color: #476079; font-size: 13px; }
+    input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    #status { margin: 8px 4px 0; color:#49627a; font-size: 13px; overflow-wrap:anywhere; }
+    #status.error { color:#9f1239; }
+    body.large .title { font-size: 20px; line-height: 1.4; }
+    body.large .hint, body.large #status { font-size: 17px; line-height: 1.5; }
+    body.large .picker { min-height: 72px; }
+  </style>
+</head>
+<body><div id="content">
+  <label class="picker" for="photo">
+    <span class="icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l1.5-2h7L17 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="3.2"/></svg></span>
+    <span><span class="title">Сфотографировать или выбрать фото</span><span class="hint">Можно перетащить файл. Фото уменьшится автоматически</span></span>
+    <input id="photo" type="file" accept="image/*" aria-label="Сфотографировать или выбрать фото">
+  </label>
+  <p id="status" aria-live="polite">Для лучшего результата снимайте состав крупным планом.</p>
+</div>
+<script>
+const send = (type, extra = {}) => window.parent.postMessage({isStreamlitMessage:true, type, ...extra}, '*');
+const content = document.getElementById('content');
+let previousHeight = 0;
+function resizeFrame() {
+  // Measure intrinsic content, never the iframe viewport: viewport measurement creates a growth loop.
+  const height = Math.ceil(content.getBoundingClientRect().height);
+  if (height !== previousHeight) { previousHeight = height; send('streamlit:setFrameHeight', {height}); }
+}
+send('streamlit:componentReady', {apiVersion:1});
+new ResizeObserver(resizeFrame).observe(content);
+window.addEventListener('message', e => {
+  if (e.data && e.data.type === 'streamlit:render') {
+    document.body.classList.toggle('large', !!(e.data.args && e.data.args.large));
+    requestAnimationFrame(resizeFrame);
+  }
+});
+requestAnimationFrame(resizeFrame);
+const input = document.getElementById('photo'), status = document.getElementById('status');
+const MAX_SIDE = 2400, MAX_BYTES = 5 * 1024 * 1024;
+function setStatus(text, isError=false) { status.textContent = text; status.classList.toggle('error', isError); }
+async function preparePhoto(file) {
+  send('streamlit:setComponentValue', {value:null});
+  if (!file) { setStatus('Для лучшего результата снимайте состав крупным планом.'); return; }
+  setStatus('Подготавливаем фото на устройстве…');
+  input.disabled = true;
+  let url;
+  try {
+    url = URL.createObjectURL(file);
+    const img = new Image();
+    await new Promise((resolve, reject) => { img.onload=resolve; img.onerror=reject; img.src=url; });
+    if (!img.naturalWidth || !img.naturalHeight) throw new Error('Invalid image');
+    let scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+    let width = Math.max(1, Math.round(img.naturalWidth * scale));
+    let height = Math.max(1, Math.round(img.naturalHeight * scale));
+    let quality = 0.88, blob = null;
+    const canvas = document.createElement('canvas');
+    for (let attempt = 0; attempt < 8; attempt++) {
+      canvas.width=width; canvas.height=height;
+      const ctx = canvas.getContext('2d'); if (!ctx) throw new Error('Canvas unavailable');
+      ctx.fillStyle='#fff'; ctx.fillRect(0,0,width,height); ctx.drawImage(img,0,0,width,height);
+      blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+      if (!blob) throw new Error('Encoding failed');
+      if (blob.size <= MAX_BYTES) break;
+      if (quality > 0.76) quality -= 0.06;
+      else { width=Math.max(1,Math.round(width*0.85)); height=Math.max(1,Math.round(height*0.85)); }
+    }
+    if (!blob || blob.size > MAX_BYTES) throw new Error('File too large');
+    const data = await new Promise((resolve, reject) => { const reader=new FileReader(); reader.onload=()=>resolve(reader.result); reader.onerror=reject; reader.readAsDataURL(blob); });
+    setStatus(`Готово: ${(file.size/1048576).toFixed(1)} МБ → ${(blob.size/1048576).toFixed(1)} МБ.`);
+    send('streamlit:setComponentValue', {value:{data, original_size:file.size, compressed_size:blob.size}});
+  } catch (e) {
+    setStatus('Не удалось обработать фото. Попробуйте другой файл или формат.', true);
+    send('streamlit:setComponentValue', {value:null});
+  } finally { if (url) URL.revokeObjectURL(url); input.disabled = false; input.value = ''; }
+}
+input.addEventListener('change', () => preparePhoto(input.files[0]));
+const picker = document.querySelector('.picker');
+picker.addEventListener('dragover', e => { e.preventDefault(); if (!input.disabled) picker.classList.add('dragging'); });
+picker.addEventListener('dragleave', () => picker.classList.remove('dragging'));
+picker.addEventListener('drop', e => {
+  e.preventDefault(); picker.classList.remove('dragging');
+  if (!input.disabled && e.dataTransfer.files.length) preparePhoto(e.dataTransfer.files[0]);
+});
+</script></body></html>
